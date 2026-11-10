@@ -143,9 +143,9 @@
       <p class="sign"><span class="k">Please touch</span> <span>Drag to move the camera. Tap a surface to focus on it.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Every pixel follows rays of light as they bounce around the scene, thousands of times, and averages what they find. The picture starts as noise and settles into soft shadows, reflections and glass. Drag to move the camera and watch it settle again.</p>
+          <p class="about">Every pixel follows rays of light as they bounce around the scene, thousands of times, and averages what they find. The picture starts as noise and settles into soft shadows, reflections and glass. Move the camera and watch it settle again.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>GLSL ES 3.00, one fragment shader, no textures</dd></div>
+            <div><dt class="k">Medium</dt><dd>WebGL 2, one fragment shader, no textures or models</dd></div>
             <div><dt class="k">Tests</dt><dd data-stat="light-tests">50</dd></div>
             <div><dt class="k">Source</dt><dd><span data-stat="light-lines">3,483</span> lines in <span data-stat="light-files">23</span> files</dd></div>
           </dl>
@@ -153,10 +153,10 @@
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>Monte Carlo integration of the rendering equation, one sample per pixel per frame.</li>
+            <li>Monte Carlo integration of the rendering equation, a few samples per pixel per frame.</li>
             <li>Next-event estimation and multiple importance sampling keep the noise down.</li>
-            <li>Glass obeys Fresnel’s equations; metal uses a GGX microfacet model.</li>
-            <li>A thin-lens camera gives real depth of field. Tap to focus.</li>
+            <li>Glass follows Fresnel’s equations; metal uses a GGX microfacet model.</li>
+            <li>A thin-lens camera gives real depth of field, and rendering stops once the image has converged.</li>
           </ul>
         </div>
       </div>
@@ -169,10 +169,10 @@
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Type your own name, then drag the planet round to its night side.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Type your own name. Then drag the planet round to its night side.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Type any word and it becomes the seed of a whole planet, with continents, oceans, ice caps, clouds and lights on the night side. The same word always makes the same world. Drag to turn it and pinch to come closer.</p>
+          <p class="about">Type any word and it becomes the seed of a whole planet, with continents, oceans, ice, clouds and an atmosphere. The same word always makes the same world. The figures beside it are measured from the terrain, not made up.</p>
           <dl class="tomb">
             <div><dt class="k">Medium</dt><dd>WebGL 2, seeded noise on a sphere, no textures</dd></div>
             <div><dt class="k">Tests</dt><dd data-stat="world-tests">26</dd></div>
@@ -183,9 +183,9 @@
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
             <li>The word is hashed into a seed, and every later choice follows from that seed.</li>
-            <li>Terrain is layered gradient noise, evaluated on the sphere so there are no seams.</li>
-            <li>Climate comes from latitude, altitude and the distance to the nearest sea.</li>
-            <li>The atmosphere is a single-scattering model, computed for every pixel.</li>
+            <li>Terrain is layered gradient noise with ridged mountains, evaluated on the sphere so there are no seams.</li>
+            <li>Climate comes from latitude, altitude and a moisture field; cities light the night side.</li>
+            <li>Ocean cover and peak heights are measured by sampling the same terrain function in JavaScript.</li>
           </ul>
         </div>
       </div>
@@ -204,8 +204,8 @@
           <p class="about">The fluid lives on a grid of cells, and each cell holds a velocity and a little dye. Every frame the solver carries both along the flow, then removes whatever would compress the fluid. Drag a finger through it and watch the vortices roll away.</p>
           <dl class="tomb">
             <div><dt class="k">Medium</dt><dd>WebGL 2, stable fluids, twenty pressure iterations</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="flow-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="flow-lines">0</span> lines in <span data-stat="flow-files">0</span> files</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="flow-tests">19</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="flow-lines">2,149</span> lines in <span data-stat="flow-files">11</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
@@ -233,8 +233,8 @@
           <p class="about">Boxes, balls and joints obey Newton’s laws here, sixty times a second. Stacks stand still instead of trembling, and chains swing without stretching. Pick anything up and throw it.</p>
           <dl class="tomb">
             <div><dt class="k">Medium</dt><dd>JavaScript, sequential impulses, a fixed 60 Hz step</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="motion-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="motion-lines">0</span> lines in <span data-stat="motion-files">0</span> files</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="motion-tests">20</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="motion-lines">2,701</span> lines in <span data-stat="motion-files">9</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
@@ -281,27 +281,27 @@
     <section class="exhibit" id="language" data-exhibit="language" aria-labelledby="language-name">
       <p class="room k"><span class="lit" aria-hidden="true"></span>Room 6</p>
       <h2 class="name" id="language-name">Language</h2>
-      <p class="what">A compiler to WebAssembly</p>
+      <p class="what">A compiler that targets WebAssembly</p>
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Change a number and watch the bytes change with it.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Change a number in the code and watch the picture change. Then open the Bytes tab.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Write a program in a small typed language and it is compiled, on your device, to real WebAssembly and run. Type errors are reported on the line they belong to. Edit the code and the output changes as you type.</p>
+          <p class="about">Sable is a small typed language made for this page. Its compiler runs in your browser: it reads the program on the left, checks its types, and writes out a real WebAssembly binary, byte by byte. The picture is drawn by the program in the editor, and the Race button measures how much faster the compiled code is than interpreting it.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>JavaScript to WebAssembly MVP, a Pratt parser, static types</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="language-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="language-lines">0</span> lines in <span data-stat="language-files">0</span> files</dd></div>
+            <div><dt class="k">Medium</dt><dd>A lexer, parser, type checker, optimiser and WebAssembly emitter in plain JavaScript</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="language-tests">20</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="language-lines">3,457</span> lines in <span data-stat="language-files">18</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>A hand-written lexer and a Pratt parser build the syntax tree.</li>
-            <li>The type checker rejects a mismatch before any code is emitted.</li>
-            <li>The back end writes the binary module byte by byte, with no toolchain.</li>
-            <li>An interpreter runs the same program, and the two results must agree.</li>
+            <li>A Pratt parser builds the syntax tree; the checker resolves every name and type, and explains mistakes in plain words.</li>
+            <li>The emitter writes the binary directly: LEB128 numbers, sections, structured control flow.</li>
+            <li>A separate interpreter runs the same programs, and 300 random ones must give identical results on both.</li>
+            <li>A disassembler reads the bytes back into text, which is what the WebAssembly tab shows.</li>
           </ul>
         </div>
       </div>
@@ -310,27 +310,27 @@
     <section class="exhibit" id="reason" data-exhibit="reason" aria-labelledby="reason-name">
       <p class="room k"><span class="lit" aria-hidden="true"></span>Room 7</p>
       <h2 class="name" id="reason-name">Reason</h2>
-      <p class="what">A computer algebra system</p>
+      <p class="what">A computer algebra system that checks its own answers</p>
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Ask for the derivative of x to the power x.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Tap an example, or type your own. Then open the steps.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Give it an expression and it will simplify, differentiate, integrate or solve it, showing each step it took. Arithmetic is exact, so fractions stay fractions. Every answer is then checked numerically at random points.</p>
+          <p class="about">It does exact mathematics. Fractions stay fractions, √8 becomes 2√2, and derivatives, integrals, factorisations and solutions come out as formulas. Every answer is then tested with numbers, and when it cannot find one it says so instead of guessing.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>JavaScript, exact rationals, rule-based rewriting</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="reason-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="reason-lines">0</span> lines in <span data-stat="reason-files">0</span> files</dd></div>
+            <div><dt class="k">Medium</dt><dd>Exact arithmetic on big integers, symbolic rewriting, a hand-built typesetter</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="reason-tests">23</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="reason-lines">3,246</span> lines in <span data-stat="reason-files">13</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>Expressions are trees, rewritten by rules until no rule applies.</li>
-            <li>Rational arithmetic uses arbitrary-precision integers, so nothing is rounded.</li>
-            <li>Integration tries a table, then substitution, then integration by parts.</li>
-            <li>Each result is verified by evaluating both sides at random points.</li>
+            <li>Every expression is kept in one canonical form, so equal things look equal.</li>
+            <li>Derivatives record each rule they apply; integrals try standard forms, parts, partial fractions and substitution.</li>
+            <li>Answers are checked at random points: an integral is differentiated and compared with what you asked for.</li>
+            <li>The mathematics is typeset by a small layout engine written for this page, not by a library.</li>
           </ul>
         </div>
       </div>
@@ -387,10 +387,10 @@
         <li><span class="n" aria-hidden="true">5</span><p>Assembled the page, ran every test again, and checked the result in a real browser at desktop and phone sizes.</p></li>
       </ol>
       <dl class="facts">
-        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">2</dd></div>
-        <div><dt class="k">Files</dt><dd data-stat="files">56</dd></div>
-        <div><dt class="k">Lines</dt><dd data-stat="lines">10,438</dd></div>
-        <div><dt class="k">Tests</dt><dd data-stat="tests">76</dd></div>
+        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">6</dd></div>
+        <div><dt class="k">Files</dt><dd data-stat="files">108</dd></div>
+        <div><dt class="k">Lines</dt><dd data-stat="lines">22,023</dd></div>
+        <div><dt class="k">Tests</dt><dd data-stat="tests">158</dd></div>
         <div><dt class="k">Dependencies</dt><dd>0</dd></div>
         <div><dt class="k">Network requests</dt><dd>0</dd></div>
       </dl>

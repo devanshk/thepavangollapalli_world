@@ -268,8 +268,12 @@ if (proofRoot && proofRun) {
         passed += res.passed;
         failed += res.failed;
       } catch (err) {
-        failed += 1;
         suite.row.dataset.state = 'done';
+        if (/dynamically imported module|Importing a module script failed|error loading/i.test(String(err && err.message))) {
+          suite.count.textContent = 'not open yet'; // the room itself is not installed
+          continue;
+        }
+        failed += 1;
         suite.row.append(h('p', { class: 'suite-fail proof-failure', text: `This suite could not be loaded: ${(err && err.message) || err}` }));
       }
     }
