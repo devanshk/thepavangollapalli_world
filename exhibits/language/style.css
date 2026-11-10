@@ -1,0 +1,311 @@
+/* LANGUAGE — editor on the left, output and the compiled binary on the right */
+
+.language-top {
+  border-top: 0;
+  border-bottom: 1px solid var(--st-line);
+}
+.language-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  min-width: 0;
+}
+.language-left,
+.language-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 500px;
+}
+.language-left {
+  border-right: 1px solid var(--st-line);
+}
+
+/* editor */
+.language-editor {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--st-bg);
+  font: var(--st-fs-code) / 1.55 var(--font-mono);
+  tab-size: 2;
+}
+.language-gutter {
+  flex: none;
+  width: 3.4em;
+  padding: 12px 10px 12px 0;
+  text-align: right;
+  color: var(--st-faint);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.language-gutter span {
+  display: block;
+}
+.language-gutter .language-bad {
+  color: var(--st-accent-ink);
+  background: var(--st-bad);
+}
+.language-code {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.language-code:focus-within {
+  box-shadow: inset 2px 0 0 var(--st-accent);
+}
+.language-hl,
+.language-input {
+  margin: 0;
+  padding: 12px 16px 12px 10px;
+  border: 0;
+  font: inherit;
+  letter-spacing: 0;
+  white-space: pre;
+  tab-size: 2;
+}
+.language-hl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  color: var(--st-text);
+  pointer-events: none;
+}
+.language-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--st-text);
+  outline: none;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.language-input::selection {
+  background: var(--st-accent-soft);
+}
+.stage .language-input:focus-visible {
+  outline: none;
+}
+/* iOS: read in colour, type in plain text (see index.js) */
+.language-ios .language-input:focus {
+  color: var(--st-text);
+  -webkit-text-fill-color: var(--st-text);
+}
+.language-ios .language-code:focus-within .language-hl {
+  visibility: hidden;
+}
+.language-k {
+  color: var(--st-accent);
+}
+.language-t {
+  color: var(--st-c3);
+}
+.language-n {
+  color: var(--st-c2);
+}
+.language-b {
+  color: var(--st-c1);
+}
+.language-f {
+  color: var(--st-c5);
+}
+.language-c {
+  color: var(--st-faint);
+  font-style: italic;
+}
+
+/* diagnostics */
+.language-diag {
+  flex: none;
+  max-height: 46%;
+  overflow: auto;
+  padding: 10px 12px;
+  border-top: 1px solid var(--st-bad);
+  background: color-mix(in oklab, var(--st-bad) 9%, var(--st-surface));
+}
+.language-diag p {
+  margin: 0;
+}
+.language-diag-msg {
+  color: var(--st-text);
+  font-weight: 600;
+}
+.language-diag-hint,
+.language-diag-note {
+  margin-top: 2px;
+  color: var(--st-muted);
+}
+.language-diag-src {
+  margin: 8px 0 6px;
+  font: var(--st-fs-sm) / 1.4 var(--font-mono);
+  color: var(--st-text);
+  overflow-x: auto;
+}
+
+/* output side */
+.language-tabs {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  padding: 6px 8px 0;
+  border-bottom: 1px solid var(--st-line);
+  background: var(--st-surface);
+}
+.language-tab {
+  appearance: none;
+  height: var(--st-control-h);
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 550;
+  color: var(--st-muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.language-tab:hover {
+  color: var(--st-text);
+}
+.language-tab[aria-selected='true'] {
+  color: var(--st-text);
+  border-bottom-color: var(--st-accent);
+}
+.language-pane {
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+  background: var(--st-bg);
+}
+.language-out {
+  display: flex;
+  flex-direction: column;
+}
+.language-screen {
+  display: block;
+  flex: 0 1 auto;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: var(--st-bg);
+}
+.language-logrow {
+  display: flex;
+  flex: 1 0 56px;
+  align-items: flex-end;
+  gap: 10px;
+  min-height: 56px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--st-line);
+  background: var(--st-surface);
+}
+.language-log {
+  flex: 1 1 0;
+  min-width: 0;
+  max-height: 100%;
+  margin: 0;
+  overflow: auto;
+  font: var(--st-fs-sm) / 1.5 var(--font-mono);
+  color: var(--st-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.language-wat {
+  padding: 12px;
+  font: var(--st-fs-sm) / 1.5 var(--font-mono);
+  color: var(--st-muted);
+  white-space: pre;
+  tab-size: 2;
+}
+.language-bytes {
+  padding: 12px;
+}
+.language-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: var(--st-fs-sm);
+  color: var(--st-muted);
+}
+.language-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.language-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.language-hex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  font: var(--st-fs-sm) / 1 var(--font-mono);
+}
+.language-hex i {
+  padding: 3px 2px;
+  font-style: normal;
+  color: var(--st-text);
+  border-radius: 2px;
+}
+.language-more {
+  margin: 10px 0 0;
+  font-size: var(--st-fs-sm);
+  color: var(--st-faint);
+}
+.language-s0 { background: color-mix(in oklab, var(--st-c1) 26%, transparent); }
+.language-s1 { background: color-mix(in oklab, var(--st-c2) 26%, transparent); }
+.language-s2 { background: color-mix(in oklab, var(--st-c3) 26%, transparent); }
+.language-s3 { background: color-mix(in oklab, var(--st-c4) 26%, transparent); }
+.language-s4 { background: color-mix(in oklab, var(--st-c5) 26%, transparent); }
+.language-s5 { background: color-mix(in oklab, var(--st-c6) 26%, transparent); }
+
+@media (max-width: 820px) {
+  .language-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .language-left {
+    height: 330px;
+    border-right: 0;
+    border-bottom: 1px solid var(--st-line);
+  }
+  .language-right {
+    height: auto;
+  }
+  .language-pane {
+    flex: none;
+    max-height: 360px;
+  }
+  .language-out {
+    max-height: none;
+  }
+  .language-logrow {
+    flex-wrap: wrap;
+  }
+  .language-log {
+    max-height: 120px;
+  }
+}
+@media (pointer: coarse) {
+  /* 16px keeps iOS from zooming the page when the editor is focused */
+  .language-editor {
+    font-size: 16px;
+  }
+}
