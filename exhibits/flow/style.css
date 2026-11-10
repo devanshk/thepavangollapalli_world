@@ -1,0 +1,21 @@
+.flow-off {
+  display: none !important;
+}
+
+.flow-legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  max-width: calc(100% - 20px);
+  padding: 4px 9px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+  background: color-mix(in srgb, var(--st-bg) 78%, transparent);
+  color: var(--st-text);
+  font: 12px/1.45 var(--font-ui);
+  pointer-events: none;
+}
+
+.flow-legend:empty {
+  display: none;
+}
