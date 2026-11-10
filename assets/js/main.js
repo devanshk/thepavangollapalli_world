@@ -66,12 +66,14 @@ class Slot {
       this.state = 'failed';
       this.stage.dataset.state = 'failed';
       this.stage.textContent = '';
+      // a module that is not there yet reads differently from one that broke
+      const missing = /dynamically imported module|Importing a module script failed|error loading/i.test(String(err && err.message));
       this.stage.append(
         h(
           'div',
           { class: 'stage-note', role: 'status' },
-          h('p', { class: 'stage-note-title', text: `${NAMES[this.id] || this.id} could not start on this device.` }),
-          h('p', { class: 'stage-note-text', text: String((err && err.message) || err) }),
+          h('p', { class: 'stage-note-title', text: missing ? 'This room is not open yet.' : `${NAMES[this.id] || this.id} could not start on this device.` }),
+          h('p', { class: 'stage-note-text', text: missing ? 'Its exhibit is still being installed.' : String((err && err.message) || err) }),
         ),
       );
       console.error(`[${this.id}]`, err);
@@ -205,71 +207,77 @@ const proofRun = document.querySelector('[data-proof-run]');
 const proofSummary = document.querySelector('[data-proof-summary]');
 
 if (proofRoot && proofRun) {
-  const suites = [...proofRoot.querySelectorAll('[data-suite]')].map((node) => ({
-    id: node.dataset.suite,
-    node,
-    marks: node.querySelector('[data-marks]'),
-    count: node.querySelector('[data-count]'),
-    detail: node.querySelector('[data-detail]'),
-  }));
+  // One row of lamps per exhibit. The counts come from the numbers stamped into the page at build
+  // time, so the wall is complete (and unlit) before anything has run.
+  const suites = slots.map(({ id }) => {
+    const stamped = document.querySelector(`[data-stat="${id}-tests"]`);
+    const n = stamped ? parseInt(stamped.textContent.replace(/\D/g, ''), 10) || 0 : 0;
+    const marks = h('span', { class: 'marks', role: 'img', 'aria-label': `${n} tests, not run yet` });
+    for (let i = 0; i < n; i++) marks.append(h('i', { class: 'mark' }));
+    const count = h('span', { class: 'suite-count', text: String(n) });
+    const row = h('div', { class: 'suite', 'data-hue': id, 'data-state': 'idle' }, h('span', { class: 'suite-name', text: NAMES[id] || id }), marks, count);
+    proofRoot.append(row);
+    return { id, row, marks, count };
+  });
 
-  const setSummary = (text, state) => {
-    if (!proofSummary) return;
-    proofSummary.textContent = text;
-    if (state) proofSummary.dataset.state = state;
+  const say = (text) => {
+    if (proofSummary) proofSummary.textContent = text;
   };
 
-  const paintMarks = (suite, tests) => {
+  async function runSuiteRow(suite) {
+    suite.row.dataset.state = 'running';
+    for (const old of suite.row.querySelectorAll('.suite-fail')) old.remove();
+    const mod = await import(`../../exhibits/${suite.id}/tests.js`);
+    const tests = mod.default;
     suite.marks.textContent = '';
-    return tests.map((t) => {
-      const m = h('i', { class: 'proof-mark', 'data-state': 'pending', title: t.name });
-      suite.marks.append(m);
-      return m;
+    const lamps = tests.map((t) => {
+      const lamp = h('i', { class: 'mark', title: t.name });
+      suite.marks.append(lamp);
+      return lamp;
     });
-  };
+    let done = 0;
+    const res = await runSuite(tests, {
+      browser: true,
+      onResult: (r, i) => {
+        lamps[i].dataset.ok = r.ok ? '1' : '0';
+        done += 1;
+        suite.count.textContent = `${done} / ${tests.length}`;
+      },
+      // yield now and then so lamps light as tests finish and the page stays responsive
+      between: () => new Promise((resolve) => setTimeout(resolve, 0)),
+    });
+    suite.count.textContent = String(tests.length);
+    suite.marks.setAttribute('aria-label', `${res.passed} of ${tests.length} tests passed`);
+    for (const r of res.results.filter((x) => !x.ok))
+      suite.row.append(h('p', { class: 'suite-fail proof-failure', text: `${r.name}: ${r.error}` }));
+    suite.row.dataset.state = 'done';
+    return res;
+  }
 
   async function runAll() {
     proofRun.disabled = true;
+    proofRun.textContent = 'Running';
     proofRoot.dataset.state = 'running';
     let passed = 0;
     let failed = 0;
     const t0 = performance.now();
     for (const suite of suites) {
-      suite.node.dataset.state = 'running';
-      if (suite.detail) suite.detail.textContent = '';
-      setSummary(`Running ${NAMES[suite.id] || suite.id}…`, 'running');
+      say(`Running ${NAMES[suite.id] || suite.id} · ${passed} passed so far`);
       try {
-        const mod = await import(`../../exhibits/${suite.id}/tests.js`);
-        const tests = mod.default;
-        const marks = paintMarks(suite, tests);
-        // Yield between tests so marks paint as they finish and the page stays responsive.
-        const res = await runSuite(tests, {
-          browser: true,
-          onResult: (r, i) => {
-            marks[i].dataset.state = r.ok ? 'pass' : 'fail';
-            if (!r.ok) marks[i].title = `${r.name} — ${r.error}`;
-          },
-          between: () => new Promise((resolve) => setTimeout(resolve, 0)),
-        });
+        const res = await runSuiteRow(suite);
         passed += res.passed;
         failed += res.failed;
-        suite.node.dataset.state = res.failed ? 'fail' : 'pass';
-        if (suite.count) suite.count.textContent = `${res.passed}/${tests.length}`;
-        if (res.failed && suite.detail) {
-          for (const r of res.results.filter((x) => !x.ok))
-            suite.detail.append(h('p', { class: 'proof-failure', text: `${r.name}: ${r.error}` }));
-        }
       } catch (err) {
         failed += 1;
-        suite.node.dataset.state = 'fail';
-        if (suite.detail) suite.detail.append(h('p', { class: 'proof-failure', text: `Could not load this suite: ${err.message || err}` }));
+        suite.row.dataset.state = 'done';
+        suite.row.append(h('p', { class: 'suite-fail proof-failure', text: `This suite could not be loaded: ${(err && err.message) || err}` }));
       }
     }
     const secs = ((performance.now() - t0) / 1000).toFixed(1);
     proofRoot.dataset.state = failed ? 'fail' : 'pass';
-    setSummary(`${passed} passed · ${failed} failed · ${secs} s on this device`, failed ? 'fail' : 'pass');
+    say(`${passed} passed · ${failed} failed · ${secs} s on this device`);
     proofRun.disabled = false;
-    proofRun.textContent = 'Run them again';
+    proofRun.textContent = 'Run again';
   }
 
   proofRun.addEventListener('click', runAll);

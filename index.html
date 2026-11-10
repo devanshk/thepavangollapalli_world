@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c1814">
+<title>From Scratch</title>
+<meta name="description" content="Eight working systems, written from scratch by Claude Fable 5.2. No libraries, no images, no web fonts and no network requests.">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/kit.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip" href="#light">Skip to the first exhibit</a>
+<div class="page" id="top">
+
+  <header class="masthead">
+    <a class="wordmark" href="#top">From Scratch</a>
+  </header>
+
+  <main id="main">
+
+    <section class="hero" aria-labelledby="headline">
+      <div class="hero-title">
+        <p class="k">Claude Fable 5.2</p>
+        <h1 id="headline"><span>Eight working</span> <span>systems, written</span> <span>from scratch.</span></h1>
+      </div>
+
+      <!-- The floor plan is a picture of the directory below: the same eight links for a finger or a
+           pointer, hidden from assistive technology and the tab order so nothing is announced twice. -->
+      <div class="floor" aria-hidden="true">
+        <ol class="plan">
+          <li><a href="#light" data-hue="light" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">1</span>
+          </a></li>
+          <li><a href="#world" data-hue="world" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">2</span>
+          </a></li>
+          <li><a href="#flow" data-hue="flow" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">3</span>
+          </a></li>
+          <li><a href="#motion" data-hue="motion" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">4</span>
+          </a></li>
+          <li><a href="#sound" data-hue="sound" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">5</span>
+          </a></li>
+          <li><a href="#language" data-hue="language" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">6</span>
+          </a></li>
+          <li><a href="#reason" data-hue="reason" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">7</span>
+          </a></li>
+          <li><a href="#learning" data-hue="learning" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">8</span>
+          </a></li>
+        </ol>
+      </div>
+
+      <figure class="brief">
+        <figcaption class="k">The entire brief</figcaption>
+        <blockquote>“Clear all data in this repo and start fresh. Build me a site showing the most impressive demo of Fable 5.2 capabilities that you can.”</blockquote>
+      </figure>
+
+      <div class="lede">
+        <p>This page is the answer. Claude Fable 5.2 planned it, wrote every line, tested it in a real browser and shipped it in one session. There are no libraries here, no images, no web fonts and no network requests. Each exhibit below is real software running live on your device.</p>
+        <p class="touch">Touch everything.</p>
+      </div>
+
+      <nav class="directory" aria-label="Directory of exhibits">
+        <p class="k" aria-hidden="true">Directory</p>
+        <ol class="key" role="list">
+          <li><a href="#light" data-hue="light">
+            <span class="key-name"><span class="key-n">1</span>Light</span>
+            <span class="key-what">A path tracer that renders with physically based light transport.</span>
+          </a></li>
+          <li><a href="#world" data-hue="world">
+            <span class="key-name"><span class="key-n">2</span>World</span>
+            <span class="key-what">A planet generated from any word you type.</span>
+          </a></li>
+          <li><a href="#flow" data-hue="flow">
+            <span class="key-name"><span class="key-n">3</span>Flow</span>
+            <span class="key-what">A Navier–Stokes fluid you can stir with a finger.</span>
+          </a></li>
+          <li><a href="#motion" data-hue="motion">
+            <span class="key-name"><span class="key-n">4</span>Motion</span>
+            <span class="key-what">A rigid-body physics engine with stable stacking and joints.</span>
+          </a></li>
+          <li><a href="#sound" data-hue="sound">
+            <span class="key-name"><span class="key-n">5</span>Sound</span>
+            <span class="key-what">Music composed by rule and played by a synthesiser, endlessly.</span>
+          </a></li>
+          <li><a href="#language" data-hue="language">
+            <span class="key-name"><span class="key-n">6</span>Language</span>
+            <span class="key-what">A compiler from a small typed language to WebAssembly.</span>
+          </a></li>
+          <li><a href="#reason" data-hue="reason">
+            <span class="key-name"><span class="key-n">7</span>Reason</span>
+            <span class="key-what">A computer algebra system that shows its steps and checks its answers.</span>
+          </a></li>
+          <li><a href="#learning" data-hue="learning">
+            <span class="key-name"><span class="key-n">8</span>Learning</span>
+            <span class="key-what">A neural network that learns a picture while you watch.</span>
+          </a></li>
+        </ol>
+      </nav>
+    </section>
+
+    <div class="strip">
+      <a class="strip-home" href="#top">From Scratch</a>
+      <nav data-nav aria-label="Rooms">
+        <ul class="rooms" role="list">
+          <li><a href="#light" data-hue="light" aria-label="Room 1, Light"><span class="n">1</span><span class="nm">Light</span></a></li>
+          <li><a href="#world" data-hue="world" aria-label="Room 2, World"><span class="n">2</span><span class="nm">World</span></a></li>
+          <li><a href="#flow" data-hue="flow" aria-label="Room 3, Flow"><span class="n">3</span><span class="nm">Flow</span></a></li>
+          <li><a href="#motion" data-hue="motion" aria-label="Room 4, Motion"><span class="n">4</span><span class="nm">Motion</span></a></li>
+          <li><a href="#sound" data-hue="sound" aria-label="Room 5, Sound"><span class="n">5</span><span class="nm">Sound</span></a></li>
+          <li><a href="#language" data-hue="language" aria-label="Room 6, Language"><span class="n">6</span><span class="nm">Language</span></a></li>
+          <li><a href="#reason" data-hue="reason" aria-label="Room 7, Reason"><span class="n">7</span><span class="nm">Reason</span></a></li>
+          <li><a href="#learning" data-hue="learning" aria-label="Room 8, Learning"><span class="n">8</span><span class="nm">Learning</span></a></li>
+          <li class="word"><a href="#proof">Tests</a></li>
+          <li class="word"><a href="#method">Method</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <section class="exhibit" id="light" data-exhibit="light" aria-labelledby="light-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 1</p>
+      <h2 class="name" id="light-name">Light</h2>
+      <p class="what">A path tracer in a fragment shader</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Drag to move the camera. Tap a surface to focus on it.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Every pixel follows rays of light as they bounce around the scene, thousands of times, and averages what they find. The picture starts as noise and settles into soft shadows, reflections and glass. Drag to move the camera and watch it settle again.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>GLSL ES 3.00, one fragment shader, no textures</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="light-tests">50</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="light-lines">3,483</span> lines in <span data-stat="light-files">23</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>Monte Carlo integration of the rendering equation, one sample per pixel per frame.</li>
+            <li>Next-event estimation and multiple importance sampling keep the noise down.</li>
+            <li>Glass obeys Fresnel’s equations; metal uses a GGX microfacet model.</li>
+            <li>A thin-lens camera gives real depth of field. Tap to focus.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="world" data-exhibit="world" aria-labelledby="world-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 2</p>
+      <h2 class="name" id="world-name">World</h2>
+      <p class="what">A planet grown from a single word</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Type your own name, then drag the planet round to its night side.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Type any word and it becomes the seed of a whole planet, with continents, oceans, ice caps, clouds and lights on the night side. The same word always makes the same world. Drag to turn it and pinch to come closer.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>WebGL 2, seeded noise on a sphere, no textures</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="world-tests">26</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="world-lines">3,236</span> lines in <span data-stat="world-files">18</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>The word is hashed into a seed, and every later choice follows from that seed.</li>
+            <li>Terrain is layered gradient noise, evaluated on the sphere so there are no seams.</li>
+            <li>Climate comes from latitude, altitude and the distance to the nearest sea.</li>
+            <li>The atmosphere is a single-scattering model, computed for every pixel.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="flow" data-exhibit="flow" aria-labelledby="flow-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 3</p>
+      <h2 class="name" id="flow-name">Flow</h2>
+      <p class="what">A fluid solved on a grid</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Stir slowly, then quickly. Two fingers make two currents.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">The fluid lives on a grid of cells, and each cell holds a velocity and a little dye. Every frame the solver carries both along the flow, then removes whatever would compress the fluid. Drag a finger through it and watch the vortices roll away.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>WebGL 2, stable fluids, twenty pressure iterations</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="flow-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="flow-lines">0</span> lines in <span data-stat="flow-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>Semi-Lagrangian advection keeps the simulation stable at any time step.</li>
+            <li>A pressure projection makes the velocity field free of divergence.</li>
+            <li>Vorticity confinement puts back the small swirls that the grid smooths away.</li>
+            <li>Every step runs in a fragment shader on half-float textures.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="motion" data-exhibit="motion" aria-labelledby="motion-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 4</p>
+      <h2 class="name" id="motion-name">Motion</h2>
+      <p class="what">A rigid-body physics engine</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Knock the tower over, then rebuild it taller.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Boxes, balls and joints obey Newton’s laws here, sixty times a second. Stacks stand still instead of trembling, and chains swing without stretching. Pick anything up and throw it.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>JavaScript, sequential impulses, a fixed 60 Hz step</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="motion-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="motion-lines">0</span> lines in <span data-stat="motion-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>A spatial hash finds candidate pairs; the separating axis theorem tests them.</li>
+            <li>Contacts are solved by sequential impulses, warm-started from the frame before.</li>
+            <li>Stacks stay still because contact points persist from one frame to the next.</li>
+            <li>Joints are constraints, solved in the same pass as the contacts.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="sound" data-exhibit="sound" aria-labelledby="sound-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 5</p>
+      <h2 class="name" id="sound-name">Sound</h2>
+      <p class="what">A composer and its synthesiser</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Tap play, then move the mood from calm to restless.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Nothing here is recorded. A small set of rules about harmony and rhythm writes the music one bar ahead, and a synthesiser built from oscillators and filters plays it. It does not repeat. Tap to start, then change the mood and hear it turn.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>Web Audio, no samples, a look-ahead scheduler</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="sound-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="sound-lines">0</span> lines in <span data-stat="sound-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>Chord progressions walk a graph of functional harmony.</li>
+            <li>Melodies follow voice-leading rules, with a seeded source of chance.</li>
+            <li>Every voice is synthesised from oscillators, envelopes, filters and a delay line.</li>
+            <li>Notes are scheduled ahead on the audio clock, so the rhythm never drifts.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="language" data-exhibit="language" aria-labelledby="language-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 6</p>
+      <h2 class="name" id="language-name">Language</h2>
+      <p class="what">A compiler to WebAssembly</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Change a number and watch the bytes change with it.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Write a program in a small typed language and it is compiled, on your device, to real WebAssembly and run. Type errors are reported on the line they belong to. Edit the code and the output changes as you type.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>JavaScript to WebAssembly MVP, a Pratt parser, static types</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="language-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="language-lines">0</span> lines in <span data-stat="language-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>A hand-written lexer and a Pratt parser build the syntax tree.</li>
+            <li>The type checker rejects a mismatch before any code is emitted.</li>
+            <li>The back end writes the binary module byte by byte, with no toolchain.</li>
+            <li>An interpreter runs the same program, and the two results must agree.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="reason" data-exhibit="reason" aria-labelledby="reason-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 7</p>
+      <h2 class="name" id="reason-name">Reason</h2>
+      <p class="what">A computer algebra system</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Ask for the derivative of x to the power x.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Give it an expression and it will simplify, differentiate, integrate or solve it, showing each step it took. Arithmetic is exact, so fractions stay fractions. Every answer is then checked numerically at random points.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>JavaScript, exact rationals, rule-based rewriting</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="reason-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="reason-lines">0</span> lines in <span data-stat="reason-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>Expressions are trees, rewritten by rules until no rule applies.</li>
+            <li>Rational arithmetic uses arbitrary-precision integers, so nothing is rounded.</li>
+            <li>Integration tries a table, then substitution, then integration by parts.</li>
+            <li>Each result is verified by evaluating both sides at random points.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="exhibit" id="learning" data-exhibit="learning" aria-labelledby="learning-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 8</p>
+      <h2 class="name" id="learning-name">Learning</h2>
+      <p class="what">A neural network, trained as you watch</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Draw something, then watch it being learned.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">A small network starts out knowing nothing and is shown a picture, one pixel at a time. With every step it adjusts its weights to be a little less wrong, and the image slowly comes into focus. Draw your own picture and it will learn that instead.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>JavaScript, hand-written backpropagation, Adam</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="learning-tests">0</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="learning-lines">0</span> lines in <span data-stat="learning-files">0</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>A multilayer perceptron maps a position on the canvas to a colour.</li>
+            <li>Fourier features let a small network hold fine detail.</li>
+            <li>Gradients come from reverse-mode differentiation, written by hand.</li>
+            <li>The Adam optimiser takes a few hundred steps a second in a worker.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="proof" id="proof" aria-labelledby="proof-h">
+      <h2 id="proof-h">Run the tests yourself</h2>
+      <div class="proof-intro">
+        <p>Every exhibit ships with its own test suite. The same tests ran in Node while the site was being built, and they run here, in your browser, against the code you just used.</p>
+        <div class="proof-run">
+          <button class="run" type="button" data-proof-run>Run all tests</button>
+          <output class="summary" data-proof-summary aria-live="polite">Not run yet on this device.</output>
+        </div>
+      </div>
+      <div class="results" data-proof data-state="idle"></div>
+    </section>
+
+    <section class="method" id="method" aria-labelledby="method-h">
+      <h2 id="method-h">How this was made</h2>
+      <ol class="steps" role="list">
+        <li><span class="n" aria-hidden="true">1</span><p>Read the brief, cleared the repository, and decided what would be worth building.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><p>Wrote a foundation: design tokens, a small interface kit, a WebGL layer, a test runner that works in Node and in the browser, and headless-browser tooling.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><p>Built the eight exhibits in parallel, one agent each, all the same model, each responsible for its own tests and screenshots.</p></li>
+        <li><span class="n" aria-hidden="true">4</span><p>Sent fresh agents to attack every exhibit: hunt for bugs, break the layout on a phone, question the mathematics. Fixed what they found.</p></li>
+        <li><span class="n" aria-hidden="true">5</span><p>Assembled the page, ran every test again, and checked the result in a real browser at desktop and phone sizes.</p></li>
+      </ol>
+      <dl class="facts">
+        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">2</dd></div>
+        <div><dt class="k">Files</dt><dd data-stat="files">56</dd></div>
+        <div><dt class="k">Lines</dt><dd data-stat="lines">10,438</dd></div>
+        <div><dt class="k">Tests</dt><dd data-stat="tests">76</dd></div>
+        <div><dt class="k">Dependencies</dt><dd>0</dd></div>
+        <div><dt class="k">Network requests</dt><dd>0</dd></div>
+      </dl>
+      <aside class="unverified" aria-labelledby="unverified-h">
+        <h3 id="unverified-h">What was not verified</h3>
+        <p>The build sandbox has no GPU and no Safari. The WebGL exhibits were checked on a software rasteriser, and WebKit compatibility comes from careful coding rather than from testing. If something misbehaves on your device, that is the likely reason.</p>
+      </aside>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <p class="foot-mark" aria-hidden="true">From Scratch</p>
+    <div class="foot-row">
+      <p>Built by Claude Fable 5.2, an AI model made by Anthropic.</p>
+      <ul class="foot-links" role="list">
+        <li><a href="https://github.com/devanshk/thepavangollapalli_world">Source on GitHub</a></li>
+        <li><a href="https://www.anthropic.com/claude/fable">About Fable</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+
+<script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

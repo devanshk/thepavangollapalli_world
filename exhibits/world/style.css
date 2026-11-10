@@ -1,0 +1,205 @@
+/* WORLD: layout of the view beside its data card, the card itself and the seed field. */
+
+.world-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 276px;
+  min-width: 0;
+}
+.world-viewcol {
+  min-width: 0;
+  background: var(--st-bg);
+}
+/* the canvas captures drags, so it stays short enough to scroll the page around it */
+.world-viewcol .kit-view {
+  max-height: 65vh;
+}
+
+.world-canvas {
+  cursor: grab;
+}
+.world-canvas--held {
+  cursor: grabbing;
+}
+.world-canvas:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ── data card ── */
+.world-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px 18px 16px;
+  background: var(--st-surface);
+  border-left: 1px solid var(--st-line);
+}
+.world-title {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.world-kicker {
+  margin: 0;
+  font-size: var(--st-fs-sm);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--st-accent);
+}
+.world-name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--st-text);
+  overflow-wrap: anywhere;
+}
+.world-seedline {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--st-fs-sm);
+  color: var(--st-muted);
+  overflow-wrap: anywhere;
+}
+.world-seed-text {
+  color: var(--st-text);
+}
+
+.world-facts {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--st-line);
+}
+.world-fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--st-line);
+  min-width: 0;
+}
+.world-fact dt {
+  color: var(--st-muted);
+  white-space: nowrap;
+}
+.world-fact dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--st-text);
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.world-card--pending .world-fact dd,
+.world-card--pending .world-mix {
+  opacity: 0.45;
+}
+.world-swatch {
+  display: inline-block;
+  width: 22px;
+  height: 12px;
+  margin-left: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--st-line);
+  vertical-align: -1px;
+}
+
+/* measured surface mix: one stacked bar and its legend */
+.world-mix {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  transition: opacity 0.15s;
+}
+.world-mix-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--st-raise);
+  gap: 1px;
+}
+.world-mix-part {
+  flex: 0 0 0;
+  min-width: 2px;
+}
+.world-mix-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--st-fs-sm);
+  color: var(--st-muted);
+}
+.world-mix-legend li {
+  white-space: nowrap;
+}
+.world-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+  border: 1px solid var(--st-line);
+}
+.world-note {
+  margin: auto 0 0;
+  font-size: var(--st-fs-sm);
+  line-height: 1.45;
+  color: var(--st-muted);
+}
+
+/* ── seed field ── */
+.world-seed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.world-seed-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13ch;
+  min-width: 0;
+  height: var(--st-control-h);
+  padding: 0 10px;
+  font: inherit;
+  font-family: var(--font-mono);
+  color: var(--st-text);
+  background: var(--st-raise);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+}
+.world-seed-input:hover {
+  background: var(--st-raise-2);
+}
+
+@media (pointer: coarse) {
+  /* iOS zooms the page when a focused field's text is under 16px */
+  .world-seed-input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .world-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .world-card {
+    gap: 12px;
+    padding: 14px var(--st-pad) 12px;
+    border-left: 0;
+    border-top: 1px solid var(--st-line);
+  }
+  .world-name {
+    font-size: 30px;
+  }
+  .world-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+  }
+}

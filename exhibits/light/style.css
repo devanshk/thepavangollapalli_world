@@ -1,0 +1,107 @@
+/* LIGHT — furniture drawn over the path-traced canvas. Colours come from the stage tokens. */
+
+.light-view .kit-canvas {
+  cursor: grab;
+}
+.light-view .kit-canvas:active {
+  cursor: grabbing;
+}
+.light-view .kit-canvas:focus-visible {
+  outline-offset: -3px;
+}
+
+/* convergence: a hairline along the bottom edge that fills as samples accumulate */
+.light-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  pointer-events: none;
+  transition: opacity 0.8s ease 0.4s;
+}
+.light-progress[data-done] {
+  opacity: 0;
+}
+.light-progress-fill {
+  height: 100%;
+  background: var(--st-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* focus reticle shown where the visitor tapped */
+.light-reticle {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: 1.5px solid var(--st-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--st-bg) 55%, transparent);
+  pointer-events: none;
+  opacity: 0;
+}
+.light-reticle[data-show] {
+  animation: light-reticle 1.3s ease-out forwards;
+}
+.light-reticle-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 7px;
+  padding: 2px 7px;
+  transform: translateX(-50%);
+  font: var(--st-fs-sm) / 1.4 var(--font-mono);
+  color: var(--st-text);
+  background: color-mix(in oklab, var(--st-bg) 82%, transparent);
+  border-radius: var(--st-radius-sm);
+  white-space: nowrap;
+}
+@keyframes light-reticle {
+  0% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* one-finger zoom, for visitors who cannot pinch */
+.light-zoom {
+  position: absolute;
+  right: 10px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.light-zoom .kit-btn {
+  width: var(--st-control-h);
+  padding: 0;
+  font-size: 17px;
+  line-height: 1;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--st-raise) 78%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.light-zoom .kit-btn:hover {
+  background: var(--st-raise-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-reticle[data-show] {
+    animation-timing-function: step-end;
+  }
+}
