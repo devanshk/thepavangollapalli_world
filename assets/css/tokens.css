@@ -1,0 +1,82 @@
+/* tokens.css — the design tokens every exhibit draws from.
+   The "stage" is the dark instrument panel an exhibit lives in. Exhibits use ONLY these
+   custom properties for colour, type and radius, so the whole site can be retuned here. */
+
+:root {
+  /* stage neutrals: a blue-black ink, never pure grey */
+  --st-bg: #0a0c11; /* behind canvases */
+  --st-surface: #10131a; /* control bars, panels */
+  --st-raise: #191d27; /* buttons, inputs, wells */
+  --st-raise-2: #222835; /* hover / pressed */
+  --st-line: #262c3a; /* hairlines */
+  --st-text: #e9ebf2;
+  --st-muted: #949cb0;
+  --st-faint: #5d6579;
+
+  /* accent: each exhibit gets its own hue via [data-exhibit] below */
+  --st-accent: #8fc7ff;
+  --st-accent-ink: #071019; /* text on an accent fill */
+  --st-accent-soft: color-mix(in oklab, var(--st-accent) 16%, transparent);
+
+  /* semantic */
+  --st-good: #62d6a0;
+  --st-warn: #f1c453;
+  --st-bad: #ff7272;
+
+  /* categorical series for in-canvas data (use in order) */
+  --st-c1: #8fc7ff;
+  --st-c2: #ffb86b;
+  --st-c3: #7be0c3;
+  --st-c4: #ff8fa8;
+  --st-c5: #c5a3ff;
+  --st-c6: #e6e27a;
+
+  /* type */
+  --font-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', 'Noto Serif', Georgia, serif;
+  --st-fs: 13px; /* control text */
+  --st-fs-sm: 11.5px; /* labels, hints */
+  --st-fs-code: 13px;
+
+  /* shape */
+  --st-radius: 12px; /* the stage itself */
+  --st-radius-sm: 7px; /* controls */
+  --st-control-h: 32px;
+  --st-gap: 10px;
+  --st-pad: 12px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --st-control-h: 40px;
+    --st-fs: 14px;
+    --st-fs-sm: 12px;
+  }
+}
+
+[data-exhibit='light'] {
+  --st-accent: #ffc56e;
+}
+[data-exhibit='world'] {
+  --st-accent: #6fd8cf;
+}
+[data-exhibit='flow'] {
+  --st-accent: #78aaff;
+}
+[data-exhibit='motion'] {
+  --st-accent: #ff8f70;
+}
+[data-exhibit='sound'] {
+  --st-accent: #c9a0ff;
+}
+[data-exhibit='language'] {
+  --st-accent: #b6e374;
+}
+[data-exhibit='reason'] {
+  --st-accent: #9bdcff;
+}
+[data-exhibit='learning'] {
+  --st-accent: #ff86b8;
+}

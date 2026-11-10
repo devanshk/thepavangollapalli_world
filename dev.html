@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exhibit harness</title>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/kit.css">
+<style>
+  /* Development harness: mounts one exhibit by itself. dev.html?x=<id>[&tests][&paused] */
+  html { background: #06070a; color: #e9ebf2; font: 15px/1.5 var(--font-ui); color-scheme: dark; }
+  body { margin: 0; padding-block: 20px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 1120px; margin: 0 auto; display: grid; gap: 14px; min-width: 0; }
+  .dev-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+  .dev-head h1 { margin: 0; font-size: 15px; font-weight: 650; }
+  .dev-head nav { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
+  .dev-head a { color: #949cb0; text-decoration: none; }
+  .dev-head a[aria-current] { color: #e9ebf2; }
+  #dev-tests { margin: 0; padding: 12px; font: 12px/1.5 var(--font-mono); background: #10131a; border: 1px solid #262c3a; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .dev-error { color: #ff7272; }
+</style>
+</head>
+<body>
+<main>
+  <header class="dev-head">
+    <h1 id="dev-title">exhibit</h1>
+    <nav id="dev-nav" aria-label="Exhibits"></nav>
+  </header>
+  <div class="stage" id="stage" data-stage></div>
+  <pre id="dev-tests" hidden></pre>
+</main>
+<script type="module">
+  window.__ready = false;
+  const IDS = ['light', 'world', 'flow', 'motion', 'sound', 'language', 'reason', 'learning'];
+  const q = new URLSearchParams(location.search);
+  const id = q.get('x') || '_example';
+  const stage = document.getElementById('stage');
+  const out = document.getElementById('dev-tests');
+  stage.dataset.exhibit = id;
+  document.getElementById('dev-title').textContent = `exhibits/${id}`;
+  document.title = `${id} · harness`;
+  const nav = document.getElementById('dev-nav');
+  for (const x of IDS) {
+    const a = document.createElement('a');
+    a.href = `?x=${x}`;
+    a.textContent = x;
+    if (x === id) a.setAttribute('aria-current', 'page');
+    nav.append(a);
+  }
+  const env = {
+    reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    coarse: matchMedia('(pointer: coarse)').matches,
+    small: innerWidth <= 640,
+  };
+  try {
+    const mod = await import(`./exhibits/${id}/index.js`);
+    const ctl = await mod.mount(stage, env);
+    window.__exhibit = ctl;
+    if (!q.has('paused')) ctl.start();
+    // pause when the tab is hidden, exactly like the real shell does
+    document.addEventListener('visibilitychange', () => {
+      if (q.has('paused')) return;
+      if (document.hidden) ctl.stop();
+      else ctl.start();
+    });
+  } catch (err) {
+    console.error(err);
+    out.hidden = false;
+    out.classList.add('dev-error');
+    out.textContent = `mount failed: ${err && err.stack ? err.stack : err}`;
+  }
+  window.__ready = true;
+
+  if (q.has('tests')) {
+    out.hidden = false;
+    out.textContent = 'running tests…';
+    try {
+      const [{ runSuite }, tests] = await Promise.all([
+        import('./assets/js/check.js'),
+        import(`./exhibits/${id}/tests.js`),
+      ]);
+      const res = await runSuite(tests.default, { browser: true });
+      out.textContent =
+        res.results.map((r) => `${r.ok ? '✓' : '✗'} ${r.name}${r.ok ? '' : '\n    ' + r.error}`).join('\n') +
+        `\n\n${res.passed} passed, ${res.failed} failed (${Math.round(res.ms)} ms)`;
+      window.__tests = res;
+    } catch (err) {
+      console.error(err);
+      out.classList.add('dev-error');
+      out.textContent = `tests failed to load: ${err && err.stack ? err.stack : err}`;
+      window.__tests = { passed: 0, failed: 1, skipped: 0, ms: 0, results: [{ name: 'load tests.js', ok: false, error: String(err) }] };
+    }
+  }
+</script>
+</body>
+</html>

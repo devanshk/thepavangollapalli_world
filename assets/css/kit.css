@@ -1,0 +1,389 @@
+/* kit.css — styles for the stage and the shared controls built by assets/js/kit.js */
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--st-surface);
+  color: var(--st-text);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  overflow: hidden;
+  font: var(--st-fs) / 1.4 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+  isolation: isolate;
+}
+.stage *,
+.stage *::before,
+.stage *::after {
+  box-sizing: border-box;
+}
+.stage :focus-visible {
+  outline: 2px solid var(--st-accent);
+  outline-offset: 2px;
+}
+
+/* ── view ── */
+.kit-view {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: var(--kit-aspect, 16 / 9);
+  max-height: 78vh;
+  background: var(--st-bg);
+  overflow: hidden;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .kit-view {
+    aspect-ratio: var(--kit-aspect-narrow, var(--kit-aspect, 16 / 9));
+    max-height: 68vh;
+  }
+}
+.kit-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.kit-canvas--pixelated {
+  image-rendering: pixelated;
+}
+
+/* ── control bar ── */
+.kit-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px var(--st-gap);
+  padding: 10px var(--st-pad);
+  background: var(--st-surface);
+  border-top: 1px solid var(--st-line);
+  min-width: 0;
+}
+.kit-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.kit-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.kit-label {
+  font-size: var(--st-fs-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--st-muted);
+  white-space: nowrap;
+}
+.kit-hint {
+  font-size: var(--st-fs-sm);
+  color: var(--st-faint);
+}
+
+/* ── button ── */
+.kit-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--st-control-h);
+  padding: 0 12px;
+  font: inherit;
+  font-weight: 550;
+  color: var(--st-text);
+  background: var(--st-raise);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.12s, border-color 0.12s, transform 0.06s;
+  -webkit-tap-highlight-color: transparent;
+}
+.kit-btn:hover {
+  background: var(--st-raise-2);
+  border-color: color-mix(in oklab, var(--st-line) 60%, var(--st-muted));
+}
+.kit-btn:active {
+  transform: translateY(1px);
+}
+.kit-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+.kit-btn--primary {
+  color: var(--st-accent-ink);
+  background: var(--st-accent);
+  border-color: transparent;
+}
+.kit-btn--primary:hover {
+  background: color-mix(in oklab, var(--st-accent) 86%, white);
+  border-color: transparent;
+}
+.kit-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--st-muted);
+}
+.kit-btn--ghost:hover {
+  color: var(--st-text);
+  background: var(--st-raise);
+  border-color: transparent;
+}
+
+/* ── toggle ── */
+.kit-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--st-control-h);
+  padding: 0 4px 0 0;
+  font: inherit;
+  color: var(--st-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--st-radius-sm);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.kit-toggle-track {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--st-raise-2);
+  border: 1px solid var(--st-line);
+  transition: background-color 0.15s, border-color 0.15s;
+  flex: none;
+}
+.kit-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--st-muted);
+  transition: transform 0.15s, background-color 0.15s;
+}
+.kit-toggle[aria-checked='true'] {
+  color: var(--st-text);
+}
+.kit-toggle[aria-checked='true'] .kit-toggle-track {
+  background: var(--st-accent-soft);
+  border-color: var(--st-accent);
+}
+.kit-toggle[aria-checked='true'] .kit-toggle-thumb {
+  transform: translateX(12px);
+  background: var(--st-accent);
+}
+
+/* ── slider ── */
+.kit-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--st-control-h);
+  min-width: 0;
+}
+.kit-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 112px;
+  min-width: 64px;
+  flex: 1 1 112px;
+  height: var(--st-control-h);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  --p: 50%;
+}
+.kit-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--st-accent) var(--p), var(--st-raise-2) var(--p));
+}
+.kit-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--st-raise-2);
+}
+.kit-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--st-accent);
+}
+.kit-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--st-text);
+  border: 0;
+  box-shadow: 0 0 0 3px var(--st-surface);
+}
+.kit-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--st-text);
+  border: 0;
+  box-shadow: 0 0 0 3px var(--st-surface);
+}
+@media (pointer: coarse) {
+  .kit-range::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    margin-top: -8px;
+  }
+  .kit-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}
+.kit-out {
+  min-width: 3.2em;
+  font-family: var(--font-mono);
+  font-size: var(--st-fs-sm);
+  color: var(--st-text);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── segmented ── */
+.kit-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.kit-seg-track {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--st-raise);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.kit-seg-track::-webkit-scrollbar {
+  display: none;
+}
+.kit-seg-btn {
+  appearance: none;
+  height: calc(var(--st-control-h) - 6px);
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 550;
+  color: var(--st-muted);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--st-radius-sm) - 2px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.kit-seg-btn:hover {
+  color: var(--st-text);
+}
+.kit-seg-btn[aria-checked='true'] {
+  color: var(--st-accent-ink);
+  background: var(--st-accent);
+}
+
+/* ── select ── */
+.kit-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.kit-select-input {
+  appearance: none;
+  -webkit-appearance: none;
+  height: var(--st-control-h);
+  max-width: 100%;
+  padding: 0 28px 0 10px;
+  font: inherit;
+  font-weight: 550;
+  color: var(--st-text);
+  background-color: var(--st-raise);
+  background-image: linear-gradient(45deg, transparent 50%, var(--st-muted) 50%),
+    linear-gradient(135deg, var(--st-muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+  cursor: pointer;
+}
+.kit-select-input:hover {
+  background-color: var(--st-raise-2);
+}
+
+/* ── stat ── */
+.kit-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+.kit-stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--st-fs);
+  color: var(--st-text);
+}
+
+/* ── overlay ── */
+.kit-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in oklab, var(--st-bg) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.kit-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 34ch;
+  text-align: center;
+}
+.kit-overlay-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--st-text);
+}
+.kit-overlay-text {
+  margin: 0;
+  color: var(--st-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage * {
+    transition-duration: 0.01ms !important;
+  }
+}

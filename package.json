@@ -1,0 +1,11 @@
+{
+  "name": "from-scratch",
+  "private": true,
+  "type": "module",
+  "description": "A static, zero-dependency site of from-scratch systems that run live in the browser.",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "test": "node tools/test.mjs",
+    "test:browser": "node tools/browser-test.mjs"
+  }
+}
