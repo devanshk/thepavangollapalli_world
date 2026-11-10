@@ -73,12 +73,13 @@ export function throws(fn, pattern, message) {
  * unless opts.browser is true. onResult(result, index) fires after each test.
  * → { passed, failed, skipped, ms, results: [{ name, ok, skipped, ms, error }] }
  */
-export async function runSuite(tests, { browser = false, onResult } = {}) {
+export async function runSuite(tests, { browser = false, onResult, between } = {}) {
   const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
   const results = [];
   const t0 = now();
   for (let i = 0; i < tests.length; i++) {
     const t = tests[i];
+    if (between && i > 0 && i % 4 === 0) await between();
     const r = { name: t.name, ok: true, skipped: false, ms: 0, error: null };
     if (t.browser && !browser) r.skipped = true;
     else {
