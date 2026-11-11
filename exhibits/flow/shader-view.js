@@ -51,22 +51,23 @@ vec3 diverging(float x) {
   float hue = x > 0.0 ? 45.0 + 45.0 * a : 255.0 - 45.0 * a;
   return oklch(0.13 + 0.80 * a, 0.13 * sin(2.2 * a), radians(hue));
 }
-// Compress an unbounded value into -1..1 so weak and strong features both show.
-float squash(float x) { return x / (0.35 + abs(x)); }
+// Compress an unbounded value into -1..1: linear near zero, levelling off for large values.
+float squash(float x) { return x / sqrt(1.0 + x * x); }
 float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 
 vec3 dyeShade(vec2 uv) {
   vec3 d = max(texture(uDye, uv).rgb, vec3(0.0));
   float peak = max(d.r, max(d.g, d.b));
-  vec2 e = 1.5 * uDyeInv;
+  vec2 e = 2.0 * uDyeInv;
   float gx = luma(texture(uDye, uv + vec2(e.x, 0.0)).rgb) - luma(texture(uDye, uv - vec2(e.x, 0.0)).rgb);
   float gy = luma(texture(uDye, uv + vec2(0.0, e.y)).rgb) - luma(texture(uDye, uv - vec2(0.0, e.y)).rgb);
-  vec3 n = normalize(vec3(-2.6 * gx, -2.6 * gy, 1.0));
+  vec3 n = normalize(vec3(-1.8 * gx, -1.8 * gy, 1.0));
   vec3 light = normalize(vec3(-0.45, 0.6, 0.66));
   float diffuse = dot(n, light);
-  float spec = pow(max(dot(n, normalize(light + vec3(0.0, 0.0, 1.0))), 0.0), 28.0);
+  float spec = pow(max(dot(n, normalize(light + vec3(0.0, 0.0, 1.0))), 1e-4), 28.0);
   // Scale all three channels alike so thick dye brightens without drifting in hue.
-  float tone = 1.0 - exp(-1.7 * peak);
+  // A soft toe keeps the thin haze left by mixing dark, so clear water still reads as clear.
+  float tone = 1.0 - exp(-1.7 * peak * smoothstep(0.0, 0.3, peak));
   vec3 col = d / max(peak, 1e-4) * tone;
   col *= 0.62 + 0.58 * diffuse;
   col += vec3(0.16) * spec * tone;
@@ -87,23 +88,28 @@ float pressureAt(vec2 x) {
 
 void main() {
   vec2 x = vUv * uGrid;
+  // The outermost ring of cells is wall: show the fluid beside it, not what the wall holds.
+  vec2 xf = clamp(x, vec2(1.5), uGrid - 1.5);
   vec3 col = vec3(0.0);
   if (uView == 0) {
-    col = dyeShade(vUv);
+    col = dyeShade(xf * uInv);
   } else if (uView == 1) {
-    vec2 vel = vec2(texture(uVel, (x + vec2(0.5, 0.0)) * uInv).r, texture(uVel, (x + vec2(0.0, 0.5)) * uInv).g);
+    vec2 vel = vec2(texture(uVel, (xf + vec2(0.5, 0.0)) * uInv).r, texture(uVel, (xf + vec2(0.0, 0.5)) * uInv).g);
     col = ember(clamp(length(vel) * uScale, 0.0, 1.0));
   } else if (uView == 2) {
-    col = diverging(squash(texture(uCurl, (x + 0.5) * uInv).r * uScale));
+    col = diverging(squash(texture(uCurl, (xf + 0.5) * uInv).r * uScale));
   } else {
-    col = diverging(squash(pressureAt(x) * uScale));
+    col = diverging(squash(pressureAt(xf) * uScale));
   }
 
   // Obstacles, drawn from the mask. The walls on the edge of the domain are not shown.
-  float m = texture(uMask, vUv).r;
-  float inside = smoothstep(1.3, 2.0, min(min(x.x, x.y), min(uGrid.x - x.x, uGrid.y - x.y)));
-  float body = smoothstep(0.42, 0.58, m) * inside;
-  float rim = (smoothstep(0.42, 0.58, m) - smoothstep(0.66, 0.86, m)) * inside;
+  // Four taps half a cell apart blur the mask a little, which rounds off the cell staircase.
+  vec2 o = 0.5 * uInv;
+  float m = 0.25 * (texture(uMask, vUv + o).r + texture(uMask, vUv - o).r
+    + texture(uMask, vUv + vec2(o.x, -o.y)).r + texture(uMask, vUv + vec2(-o.x, o.y)).r);
+  float inside = smoothstep(1.5, 2.5, min(min(x.x, x.y), min(uGrid.x - x.x, uGrid.y - x.y)));
+  float body = smoothstep(0.44, 0.56, m) * inside;
+  float rim = (smoothstep(0.44, 0.56, m) - smoothstep(0.62, 0.84, m)) * inside;
   col = mix(col, uBody, body) + uRim * rim * 0.55;
 
   float noise = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));

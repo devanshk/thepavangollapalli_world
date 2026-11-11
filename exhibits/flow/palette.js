@@ -65,3 +65,20 @@ export function emitter(k, t, out = { x: 0, y: 0, dx: 0, dy: 0, pulse: 0, color:
   for (let c = 0; c < 3; c++) out.color[c] = a[c] + (b[c] - a[c]) * f;
   return out;
 }
+
+export const OPENING_STROKES = 3;
+
+/** Point t (0..1) along opening stroke k, written into p.x and p.y (0..1, y up). The strokes are drawn once, before the first frame. */
+export function openingStroke(k, t, p) {
+  if (k === 0) {
+    p.x = 0.14 + 0.72 * t;
+    p.y = 0.36 + 0.2 * Math.sin(7.5 * t);
+  } else if (k === 1) {
+    p.x = 0.86 - 0.72 * t;
+    p.y = 0.68 - 0.18 * Math.sin(6.9 * t + 1);
+  } else {
+    p.x = 0.5 + 0.26 * Math.cos(6.3 * t + 2);
+    p.y = 0.52 + 0.3 * Math.sin(6.3 * t + 2);
+  }
+  return p;
+}

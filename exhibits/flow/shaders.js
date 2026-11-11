@@ -66,12 +66,15 @@ void main() {
 export const ADVECT_VEL_FIX = `${HEAD}
 uniform sampler2D uHat;
 void bounds(vec2 q, out vec2 lo, out vec2 hi) {
-  ivec2 b = ivec2(floor(q - 0.5));
+  vec2 f = q - 0.5;
+  ivec2 b = ivec2(floor(f));
+  // A texel with zero weight was not blended, so it does not count.
+  ivec2 o = ivec2(f.x > floor(f.x) ? 1 : 0, f.y > floor(f.y) ? 1 : 0);
   ivec2 top = uSize - 1;
   vec2 s0 = texelFetch(uVel, clamp(b, ivec2(0), top), 0).rg;
-  vec2 s1 = texelFetch(uVel, clamp(b + ivec2(1, 0), ivec2(0), top), 0).rg;
-  vec2 s2 = texelFetch(uVel, clamp(b + ivec2(0, 1), ivec2(0), top), 0).rg;
-  vec2 s3 = texelFetch(uVel, clamp(b + ivec2(1, 1), ivec2(0), top), 0).rg;
+  vec2 s1 = texelFetch(uVel, clamp(b + ivec2(o.x, 0), ivec2(0), top), 0).rg;
+  vec2 s2 = texelFetch(uVel, clamp(b + ivec2(0, o.y), ivec2(0), top), 0).rg;
+  vec2 s3 = texelFetch(uVel, clamp(b + o, ivec2(0), top), 0).rg;
   lo = min(min(s0, s1), min(s2, s3));
   hi = max(max(s0, s1), max(s2, s3));
 }
@@ -136,7 +139,8 @@ void main() {
   }
   vec2 next = vel + uVisc * uDt * (l + r + d + t - 4.0 * vel);
 
-  // Confinement pushes along N x w, where N points up the gradient of |w|.
+  // Confinement pushes along N x w, where N points up the gradient of |w|. Faint vorticity
+  // is left alone, so rounding noise is never fed.
   float w00 = curlAt(c);
   float w10 = curlAt(c + ivec2(1, 0));
   float w01 = curlAt(c + ivec2(0, 1));
@@ -145,9 +149,11 @@ void main() {
   float a01 = abs(w01);
   float a11 = abs(curlAt(c + ivec2(1, 1)));
   vec2 g = vec2(0.25 * (a10 + a11 - abs(curlAt(c - ivec2(1, 0))) - abs(curlAt(c + ivec2(-1, 1)))), a01 - a00);
-  next.x += uConfine * uDt * (g.y / (length(g) + 1e-4)) * 0.5 * (w00 + w01);
+  float wu = 0.5 * (w00 + w01);
+  next.x += uConfine * uDt * (g.y / (length(g) + 1e-4)) * wu * smoothstep(0.02, 0.1, abs(wu));
   g = vec2(a10 - a00, 0.25 * (a01 + a11 - abs(curlAt(c - ivec2(0, 1))) - abs(curlAt(c + ivec2(1, -1)))));
-  next.y -= uConfine * uDt * (g.x / (length(g) + 1e-4)) * 0.5 * (w00 + w10);
+  float wv = 0.5 * (w00 + w10);
+  next.y -= uConfine * uDt * (g.x / (length(g) + 1e-4)) * wv * smoothstep(0.02, 0.1, abs(wv));
 
   // Outflow sponge: ease back to the free stream so eddies leave quietly.
   if (uInflow > 0.0) {
@@ -246,15 +252,26 @@ void main() {
   vec2 vel = velocityAt(x);
   vec2 back = x - uDt * vel;
   vec3 dye = texelFetch(uHat, c, 0).rgb;
-  if (nearSolid(x, back) <= 0.0) {
-    ivec2 b = ivec2(floor(back * uInv * uDyeSize - 0.5));
+  float wall = nearSolid(x, back);
+  if (wall < 0.5) {
+    vec2 f = back * uInv * uDyeSize - 0.5;
+    ivec2 b = ivec2(floor(f));
+    ivec2 o = ivec2(f.x > floor(f.x) ? 1 : 0, f.y > floor(f.y) ? 1 : 0);
     ivec2 top = ivec2(uDyeSize) - 1;
     vec3 s0 = texelFetch(uDye, clamp(b, ivec2(0), top), 0).rgb;
-    vec3 s1 = texelFetch(uDye, clamp(b + ivec2(1, 0), ivec2(0), top), 0).rgb;
-    vec3 s2 = texelFetch(uDye, clamp(b + ivec2(0, 1), ivec2(0), top), 0).rgb;
-    vec3 s3 = texelFetch(uDye, clamp(b + ivec2(1, 1), ivec2(0), top), 0).rgb;
-    vec3 fixed3 = dye + 0.5 * (texelFetch(uDye, c, 0).rgb - texture(uHat, (x + uDt * vel) * uInv).rgb);
-    dye = clamp(fixed3, min(min(s0, s1), min(s2, s3)), max(max(s0, s1), max(s2, s3)));
+    vec3 s1 = texelFetch(uDye, clamp(b + ivec2(o.x, 0), ivec2(0), top), 0).rgb;
+    vec3 s2 = texelFetch(uDye, clamp(b + ivec2(0, o.y), ivec2(0), top), 0).rgb;
+    vec3 s3 = texelFetch(uDye, clamp(b + o, ivec2(0), top), 0).rgb;
+    vec3 lo = min(min(s0, s1), min(s2, s3));
+    vec3 hi = max(max(s0, s1), max(s2, s3));
+    vec3 corrected = dye + 0.5 * (texelFetch(uDye, c, 0).rgb - texture(uHat, (x + uDt * vel) * uInv).rgb);
+    vec3 limited = clamp(corrected, lo, hi);
+    // Where the correction overshoots badly, the edge is sharper than the grid can carry and
+    // clamping it leaves a staircase, so ease back to the first-order value there.
+    vec3 over = abs(corrected - limited) / (0.5 * (hi - lo) + 1e-4);
+    vec3 fixedDye = mix(limited, dye, smoothstep(vec3(0.0), vec3(1.0), over));
+    // Fade the correction out towards solids: a hard switch would show as a seam.
+    dye = mix(fixedDye, dye, smoothstep(0.0, 0.5, wall));
   }
   fragColor = vec4(dye, 1.0);
 }`;
@@ -269,8 +286,8 @@ uniform vec3 uStreakCol[6];
 vec3 streak(float y) {
   float bands = 13.0;
   float f = fract(y * bands);
-  float px = 1.5 * bands / uDyeSize.y;
-  float band = smoothstep(0.34 - px, 0.34 + px, f) * (1.0 - smoothstep(0.66 - px, 0.66 + px, f));
+  // A soft-shouldered line: an edge one texel wide would be sharper than advection can carry.
+  float band = smoothstep(0.26, 0.5, f) * (1.0 - smoothstep(0.5, 0.74, f));
   int index = int(clamp(floor(y * 6.0), 0.0, 5.0));
   return uStreakCol[index] * band;
 }
@@ -280,10 +297,13 @@ void main() {
   vec3 dye = vec3(0.0);
   if (isSolid(cell)) {
     float count = 0.0;
-    if (!isSolid(cell - ivec2(1, 0))) { dye += texture(uDye, (x - vec2(1.0, 0.0)) * uInv).rgb; count += 1.0; }
-    if (!isSolid(cell + ivec2(1, 0))) { dye += texture(uDye, (x + vec2(1.0, 0.0)) * uInv).rgb; count += 1.0; }
-    if (!isSolid(cell - ivec2(0, 1))) { dye += texture(uDye, (x - vec2(0.0, 1.0)) * uInv).rgb; count += 1.0; }
-    if (!isSolid(cell + ivec2(0, 1))) { dye += texture(uDye, (x + vec2(0.0, 1.0)) * uInv).rgb; count += 1.0; }
+    // Mirror the fluid across every face it shares with this cell, so dye is continuous at the wall.
+    vec2 lo = vec2(cell);
+    vec2 hi = lo + 1.0;
+    if (!isSolid(cell - ivec2(1, 0))) { dye += texture(uDye, vec2(2.0 * lo.x - x.x, x.y) * uInv).rgb; count += 1.0; }
+    if (!isSolid(cell + ivec2(1, 0))) { dye += texture(uDye, vec2(2.0 * hi.x - x.x, x.y) * uInv).rgb; count += 1.0; }
+    if (!isSolid(cell - ivec2(0, 1))) { dye += texture(uDye, vec2(x.x, 2.0 * lo.y - x.y) * uInv).rgb; count += 1.0; }
+    if (!isSolid(cell + ivec2(0, 1))) { dye += texture(uDye, vec2(x.x, 2.0 * hi.y - x.y) * uInv).rgb; count += 1.0; }
     dye /= max(count, 1.0);
   } else {
     dye = texelFetch(uDye, ivec2(gl_FragCoord.xy), 0).rgb * uFade;

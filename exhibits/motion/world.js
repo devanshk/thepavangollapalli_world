@@ -73,6 +73,7 @@ export class World {
     b.index = this.bodies.length;
     this.bodies.push(b);
     this.sorted.push(b);
+    this.moving = true;
     return b;
   }
 

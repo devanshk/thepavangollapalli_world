@@ -1,0 +1,111 @@
+// The four moods. Each one fixes the mode, tempo range, density, instrumentation and effect
+// amounts; the seed decides everything else. Pure data, shared by the composer and the synth.
+//
+// Rhythm patterns are Euclidean: [onsets, steps] or [onsets, steps, rotation].
+// `sections` flags say in which of the four sections (A, A′, B, A) a layer plays.
+
+export const MOODS = {
+  dawn: {
+    id: 'dawn',
+    name: 'Dawn',
+    mode: 'lydian',
+    tonics: [0, 2, 3, 5, 7, 9],
+    tempo: [66, 76],
+    sevenths: true,
+    leadCentre: 74,
+    motifNotes: [3, 4],
+    restProb: 0.3,
+    bass: 'long',
+    arp: { patterns: [[3, 8], [4, 8], [5, 8]], sections: [1, 1, 1, 1] },
+    drums: null,
+    sound: {
+      mix: { pad: 1, bass: 0.9, arp: 0.8, lead: 1, drums: 0 },
+      padCutoff: 1500,
+      bell: { ratio: 3, index: 1.2, release: 1.3 },
+      pluckBright: 7,
+      reverb: { seconds: 3.4, sends: { pad: 0.4, bass: 0, arp: 0.45, lead: 0.55, drums: 0 } },
+      delay: { feedback: 0.42, sends: { pad: 0, bass: 0, arp: 0.35, lead: 0.3, drums: 0 } },
+    },
+  },
+  drift: {
+    id: 'drift',
+    name: 'Drift',
+    mode: 'dorian',
+    tonics: [2, 4, 7, 9, 11, 0],
+    tempo: [84, 94],
+    sevenths: true,
+    leadCentre: 72,
+    motifNotes: [3, 4, 5],
+    restProb: 0.15,
+    bass: 'tresillo',
+    arp: { patterns: [[5, 8], [3, 8]], sections: [1, 1, 1, 1] },
+    drums: {
+      kick: [0, 1, 0, 1],
+      snare: [0, 0, 0, 0],
+      hat: [1, 1, 1, 1],
+      kicks: [[2, 8, 0]],
+      hats: [[5, 8, 0], [3, 8, 0]],
+    },
+    sound: {
+      mix: { pad: 0.85, bass: 1, arp: 0.75, lead: 1, drums: 0.7 },
+      padCutoff: 1150,
+      bell: { ratio: 1, index: 1.7, release: 0.7 },
+      pluckBright: 5,
+      reverb: { seconds: 2.3, sends: { pad: 0.3, bass: 0, arp: 0.3, lead: 0.4, drums: 0.15 } },
+      delay: { feedback: 0.36, sends: { pad: 0, bass: 0, arp: 0.3, lead: 0.22, drums: 0 } },
+    },
+  },
+  pulse: {
+    id: 'pulse',
+    name: 'Pulse',
+    mode: 'aeolian',
+    tonics: [9, 4, 2, 7, 0, 5],
+    tempo: [108, 120],
+    sevenths: false,
+    leadCentre: 72,
+    motifNotes: [4, 5],
+    restProb: 0,
+    bass: 'drive',
+    arp: { patterns: [[7, 16], [9, 16], [5, 8]], sections: [0, 1, 1, 1] },
+    drums: {
+      kick: [1, 1, 0, 1],
+      snare: [0, 1, 0, 1],
+      hat: [1, 1, 1, 1],
+      kicks: [[4, 16, 0], [3, 8, 0], [5, 16, 0]],
+      hats: [[4, 16, -2], [8, 16, 0], [11, 16, 0]],
+    },
+    sound: {
+      mix: { pad: 0.7, bass: 1, arp: 0.85, lead: 0.95, drums: 1 },
+      padCutoff: 950,
+      bell: { ratio: 2, index: 1.9, release: 0.5 },
+      pluckBright: 8,
+      reverb: { seconds: 1.7, sends: { pad: 0.25, bass: 0, arp: 0.22, lead: 0.3, drums: 0.12 } },
+      delay: { feedback: 0.4, sends: { pad: 0, bass: 0, arp: 0.32, lead: 0.25, drums: 0 } },
+    },
+  },
+  nocturne: {
+    id: 'nocturne',
+    name: 'Nocturne',
+    mode: 'phrygian',
+    tonics: [4, 9, 2, 11, 6, 1],
+    tempo: [50, 58],
+    sevenths: false,
+    leadCentre: 69,
+    motifNotes: [2, 3],
+    restProb: 0.5,
+    bass: 'slow',
+    arp: { patterns: [[2, 8], [3, 8]], sections: [0, 1, 1, 0] },
+    drums: null,
+    sound: {
+      mix: { pad: 1, bass: 0.9, arp: 0.6, lead: 1, drums: 0 },
+      padCutoff: 720,
+      bell: { ratio: 3.5, index: 0.8, release: 2 },
+      pluckBright: 4,
+      reverb: { seconds: 4.6, sends: { pad: 0.45, bass: 0.05, arp: 0.5, lead: 0.65, drums: 0 } },
+      delay: { feedback: 0.45, sends: { pad: 0, bass: 0, arp: 0.3, lead: 0.35, drums: 0 } },
+    },
+  },
+};
+
+export const MOOD_ORDER = ['dawn', 'drift', 'pulse', 'nocturne'];
+export const VOICES = ['pad', 'bass', 'arp', 'lead', 'drums'];

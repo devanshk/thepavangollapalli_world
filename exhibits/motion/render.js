@@ -7,8 +7,10 @@ import { GROUND } from './scenes.js';
 
 const TAU = Math.PI * 2;
 
+/** Returns { draw }, or null when the browser provides no 2D canvas context. */
 export function createRenderer(canvas, root) {
   const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
   const token = (name) => cssVar(root, name);
   const col = {
     bg: token('--st-bg'),

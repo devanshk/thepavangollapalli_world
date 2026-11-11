@@ -5,7 +5,7 @@ import { createGL, onContextLoss } from '../../assets/js/glkit.js';
 import { createSolver, createSplats, VIEWS } from './gpu.js';
 import { createDrawing, preset, stampLine, buildMask } from './shapes.js';
 import { LEVELS, gridFor, levelForStepTime, createGovernor } from './quality.js';
-import { touchColor, emitter, JET_COUNT } from './palette.js';
+import { touchColor, emitter, JET_COUNT, openingStroke, OPENING_STROKES } from './palette.js';
 import { trackPointers } from './input.js';
 
 const LABELS = {
@@ -39,6 +39,11 @@ function tokenLinear(root, name) {
 export async function mount(root, env) {
   await loadCSS(new URL('./style.css', import.meta.url));
   const v = view(root, { aspect: 16 / 9, aspectNarrow: 1, label: LABELS.ink });
+  // The canvas swallows touch drags, so on touch screens leave room to scroll the page past it.
+  if (env.coarse) {
+    v.wrap.style.maxHeight = '65vh';
+    v.measure();
+  }
 
   let glc = createGL(v.canvas);
   let solver = null;
@@ -58,7 +63,9 @@ export async function mount(root, env) {
   const colors = { bg: tokenLinear(root, '--st-bg'), body: tokenLinear(root, '--st-raise'), rim: tokenLinear(root, '--st-muted') };
   const touchFirst = env.coarse || env.small;
 
-  const state = { mode: 'ink', view: 'dye', tool: 'draw', viscosity: 0, confine: 0.12, shape: 'cylinder' };
+  const state = { mode: 'ink', view: 'dye', tool: 'draw', viscosity: 0, shape: 'cylinder' };
+  // Vorticity confinement per mode: the tunnel gets very little, so its wake stays honest.
+  const swirl = { ink: 0.05, tunnel: 0.02 };
   const splats = createSplats();
   const params = { dt: 1, confine: 0, viscosity: 0, velFade: 1, dyeFade: 1, sweeps: 14, omega: OMEGA, splats, streaks: 0 };
   const jet = emitter(0, 0);
@@ -84,8 +91,9 @@ export async function mount(root, env) {
   const gridStat = stat({ label: 'Grid' });
   const fpsStat = stat({ label: 'fps' });
   const hintNode = hint('');
+  const swirlCtl = slider({ label: 'Swirl', min: 0, max: 0.15, step: 0.01, value: swirl.ink, format: (x) => x.toFixed(2), onInput: (x) => (swirl[state.mode] = x) });
   const resetBtn = button({ label: 'Clear', onClick: () => { resetFlow(); draw(); } });
-  const shapeBtn = (label, name) => button({ label, onClick: () => { state.shape = name; preset(drawing, name); maskDirty = true; uploadMask(); resetFlow(); draw(); } });
+  const shapeBtn = (label, name) => button({ label, onClick: () => { state.shape = name; if (!drawing) return; preset(drawing, name); maskDirty = true; uploadMask(); resetFlow(); draw(); } });
   const tunnelBar = bar(
     root,
     segmented({
@@ -107,22 +115,22 @@ export async function mount(root, env) {
     }),
     resetBtn,
   );
-  bar(
+  const tuningBar = bar(
     root,
     slider({ label: 'Viscosity', min: 0, max: 0.2, step: 0.01, value: state.viscosity, format: (x) => x.toFixed(2), onInput: (x) => (state.viscosity = x) }),
-    slider({ label: 'Swirl', min: 0, max: 0.4, step: 0.01, value: state.confine, format: (x) => x.toFixed(2), onInput: (x) => (state.confine = x) }),
+    swirlCtl,
     spacer(),
-    gridStat,
-    fpsStat,
+    group(gridStat, fpsStat),
   );
   bar(root, hintNode);
-  root.insertBefore(tunnelBar, hintNode.parentNode);
+  root.insertBefore(tunnelBar, tuningBar);
 
   function describe() {
     const tunnel = state.mode === 'tunnel';
     tunnelBar.classList.toggle('flow-off', !tunnel);
     resetBtn.setLabel(tunnel ? 'Restart flow' : 'Clear');
     legend.textContent = LEGENDS[state.view];
+    swirlCtl.value = swirl[state.mode];
     v.canvas.setAttribute('aria-label', LABELS[state.mode]);
     if (tunnel) hintNode.textContent = 'Flow enters from the left. Draw walls, or pick a shape and watch its wake roll up.';
     else hintNode.textContent = touchFirst ? 'Drag to stir. Every finger gets its own colour.' : 'Drag to stir. Every stroke gets its own colour.';
@@ -179,7 +187,9 @@ export async function mount(root, env) {
     pushVelocity(x, y, x, y, u, 0.6 * u, 0.07 * grid.m, state.shape === 'none' ? 0 : 0.9);
     solver.splatVelocity(splats);
     splats.velCount = 0;
-    solver.project(60, OMEGA);
+    // One thorough projection, over-relaxed close to the optimum for a grid this long, so the
+    // stream starts already parted around the body.
+    solver.project(120, 1.95);
   }
 
   function setMode(mode) {
@@ -259,10 +269,11 @@ export async function mount(root, env) {
       emitter(k, emitTime, jet);
       const x = jet.x * n;
       const y = jet.y * m;
-      const reach = 0.02 * n;
       const speed = 0.011 * n * jet.pulse * boost;
-      pushVelocity(x, y, x + jet.dx * reach, y + jet.dy * reach, jet.dx * speed, jet.dy * speed, 0.02 * n, 0.5);
-      pushDye(x, y, x + jet.dx * reach, y + jet.dy * reach, jet.color, 1.2, 0.016 * n);
+      // Each puff reaches as far as the fluid travels in a step, so a fast jet leaves no gaps.
+      const reach = Math.max(0.012 * n, speed * dt);
+      pushVelocity(x, y, x + jet.dx * reach, y + jet.dy * reach, jet.dx * speed, jet.dy * speed, 0.018 * n, 0.5);
+      pushDye(x, y, x + jet.dx * reach, y + jet.dy * reach, jet.color, 1.2, 0.012 * n);
     }
   }
 
@@ -271,11 +282,11 @@ export async function mount(root, env) {
     gatherStrokes(dt, jets, boost);
     uploadMask();
     params.dt = dt;
-    params.confine = state.confine;
+    params.confine = swirl[state.mode];
     // Explicit diffusion is only stable below a quarter of a cell squared per step.
     params.viscosity = Math.min(state.viscosity, 0.22 / dt);
     params.velFade = tunnel ? 1 : 0.999;
-    params.dyeFade = tunnel ? 1 : 0.998 ** dt;
+    params.dyeFade = tunnel ? 1 : 0.9945 ** dt;
     params.sweeps = LEVELS[level].sweeps;
     params.streaks = tunnel ? 1 : 0;
     solver.step(params);
@@ -285,7 +296,7 @@ export async function mount(root, env) {
     if (lost || destroyed || !grid.n) return;
     const tunnel = state.mode === 'tunnel';
     const u = inflowSpeed();
-    let scale = 12;
+    let scale = 8;
     if (state.view === 'speed') scale = tunnel ? 1 / (1.8 * u) : 1 / (0.02 * grid.n);
     else if (state.view === 'pressure') scale = tunnel ? 2 / (u * u) : 2 / (0.012 * grid.n) ** 2;
     solver.render(VIEWS[state.view], scale, colors.bg, colors.body, colors.rim);
@@ -297,7 +308,7 @@ export async function mount(root, env) {
     const real = (now - lastFrame) / 1000;
     lastFrame = now;
     if (!grid.n || lost) return;
-    if (real > 0 && real < 0.25) frameAverage += (real - frameAverage) * 0.08;
+    if (real > 0 && real < 1) frameAverage += (real - frameAverage) * 0.08;
     const next = governor.sample(real);
     if (next !== level) {
       level = next;
@@ -316,34 +327,70 @@ export async function mount(root, env) {
     if (++frames % 20 === 0) fpsStat.set(Math.round(1 / frameAverage));
   });
 
+  // Resolves once the GPU has finished everything submitted so far. A fence is polled because
+  // gl.finish() does not wait in every browser and a pixel read-back would stall the pipeline.
+  function gpuIdle() {
+    const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+    gl.flush();
+    const began = performance.now();
+    return new Promise((resolve) => {
+      const poll = () => {
+        const waiting = !destroyed && !lost && performance.now() - began < 4000 && gl.clientWaitSync(sync, 0, 0) === gl.TIMEOUT_EXPIRED;
+        if (waiting) {
+          setTimeout(poll, 1);
+          return;
+        }
+        gl.deleteSync(sync);
+        resolve();
+      };
+      setTimeout(poll, 0);
+    });
+  }
+
   // Measure what a step costs here, pick the grid from that, then run the ink for a moment
   // so the first thing on screen is already a picture.
   async function warmUp() {
     configure();
     if (!grid.n) return;
     advance(1, true, 1.5);
-    gl.finish();
+    await gpuIdle();
     const t0 = performance.now();
-    advance(1, true, 1.5);
-    advance(1, true, 1.5);
-    gl.finish();
-    const measured = levelForStepTime((performance.now() - t0) / 2, touchFirst);
+    for (let k = 0; k < 6; k++) advance(1, true, 1.5);
+    await gpuIdle();
+    if (destroyed || lost) return;
+    const measured = levelForStepTime((performance.now() - t0) / 6, touchFirst);
     governor = createGovernor(measured, touchFirst ? 3 : LEVELS.length - 1);
     if (measured !== level) {
       level = measured;
       configure();
     }
+    // Three opening strokes, made exactly the way a finger makes them, then time for them to curl.
+    const ghosts = [];
+    for (let k = 0; k < OPENING_STROKES; k++) {
+      const p = openingStroke(k, 0, { x: 0, y: 0, px: 0, py: 0, index: -1, released: false, color: touchColor([1, 5, 2][k]) });
+      p.px = p.x;
+      p.py = p.y;
+      ghosts.push(p);
+      pointers.active.set(-1 - k, p);
+    }
+    const strokeSteps = 30;
     const began = performance.now();
-    let steps = 3;
-    while (steps < 64 && (steps < 24 || performance.now() - began < 700)) {
+    let steps = 0;
+    while (steps < 110 && (steps < 60 || performance.now() - began < 900)) {
       for (let k = 0; k < 4; k++, steps++) {
+        for (let g = 0; g < ghosts.length; g++) {
+          if (steps <= strokeSteps) openingStroke(g, steps / strokeSteps, ghosts[g]);
+          if (steps === strokeSteps) ghosts[g].released = true;
+        }
         emitTime += 1 / 60;
         advance(1, true, 1.5);
       }
-      gl.finish();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      if (destroyed || lost) return;
+      await gpuIdle();
+      if (destroyed || lost) break;
     }
+    for (const p of ghosts) p.released = true;
+    pointers.flush();
+    idle = 99;
   }
 
   const offLoss = onContextLoss(v.canvas, {

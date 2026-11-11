@@ -1,6 +1,6 @@
 // Motion — a 2D rigid-body engine. This file is the thin DOM layer: controls, pointer input, the
 // fixed-timestep loop and read-outs. The engine itself lives in the pure modules beside it.
-import { view, bar, group, button, toggle, slider, select, stat, hint, spacer, loop, pointer, fpsMeter, rng, clamp } from '../../assets/js/kit.js';
+import { view, bar, group, button, toggle, slider, select, stat, hint, spacer, overlay, loop, pointer, fpsMeter, rng, clamp } from '../../assets/js/kit.js';
 import { DT, DYNAMIC } from './world.js';
 import { MouseJoint } from './joints.js';
 import { SCENES, GROUND, createScene, randomShape } from './scenes.js';
@@ -20,27 +20,34 @@ export function mount(root, env) {
     label: 'Rigid bodies colliding, stacking and swinging under gravity. Drag a shape to throw it.',
   });
   const renderer = createRenderer(v.canvas, root);
+  if (!renderer) {
+    overlay(v.wrap, {
+      title: 'Canvas drawing is not available',
+      text: 'This exhibit draws with the 2D canvas, which this browser did not provide.',
+    });
+    return { start() {}, stop() {}, destroy: () => v.destroy() };
+  }
 
   let scene = null;
   let sceneId = SCENES[0].id;
   let builtAspect = 0;
   let gravity = 9.8;
   let slow = false;
-  let debug = false;
   let paused = !!env.reducedMotion;
   let acc = 0;
   let dirty = true;
-  let drag = null;
   let tap = null;
+  // once the visitor has interfered, the scene is theirs: it no longer restarts on its own
   let touched = false;
   let dropRng = rng(2024);
   let statsTimer = STATS_INTERVAL;
+  const frame = { alpha: 0, debug: false, drag: null };
   const dropped = [];
   const fps = fpsMeter();
 
   const stats = {
     bodies: stat({ label: 'Bodies' }),
-    contacts: stat({ label: 'Contact points' }),
+    contacts: stat({ label: 'Contacts' }),
     collide: stat({ label: 'Collide' }),
     solve: stat({ label: 'Solve' }),
     energy: stat({ label: 'Energy' }),
@@ -49,7 +56,8 @@ export function mount(root, env) {
 
   function draw() {
     if (!scene || !v.size.pw) return;
-    renderer.draw(scene, v.size, { alpha: acc / DT, debug, drag });
+    frame.alpha = acc / DT;
+    renderer.draw(scene, v.size, frame);
     dirty = false;
   }
 
@@ -64,7 +72,7 @@ export function mount(root, env) {
       if (b.awake) awake++;
     }
     stats.bodies.set(`${bodies} · ${awake} awake`);
-    stats.contacts.set(world.pointCount);
+    stats.contacts.set(`${world.manifoldCount} · ${world.pointCount} points`);
     stats.energy.set(formatEnergy(world.energy()));
     if (world.timedSteps > 0) {
       // wall-clock time per step, averaged over the steps since the last read-out
@@ -77,9 +85,9 @@ export function mount(root, env) {
   }
 
   function releaseDrag() {
-    if (!drag) return;
-    scene.world.removeJoint(drag);
-    drag = null;
+    if (!frame.drag) return;
+    scene.world.removeJoint(frame.drag);
+    frame.drag = null;
     v.canvas.style.cursor = '';
   }
 
@@ -117,6 +125,7 @@ export function mount(root, env) {
     label: paused ? 'Play' : 'Pause',
     onClick: () => {
       paused = !paused;
+      touched = true;
       pauseButton.setLabel(paused ? 'Play' : 'Pause');
     },
   });
@@ -145,12 +154,20 @@ export function mount(root, env) {
         if (scene) scene.world.setGravity(g);
       },
     }),
-    toggle({ label: 'Slow motion', value: slow, onChange: (on) => (slow = on) }),
+    toggle({
+      label: 'Slow motion',
+      value: slow,
+      onChange: (on) => {
+        slow = on;
+        touched = true;
+      },
+    }),
     toggle({
       label: 'Show internals',
-      value: debug,
+      value: frame.debug,
       onChange: (on) => {
-        debug = on;
+        frame.debug = on;
+        touched = true;
         dirty = true;
       },
     }),
@@ -162,6 +179,7 @@ export function mount(root, env) {
   const toWorld = (p) => [(p.x / p.w) * scene.W, (1 - p.y / p.h) * scene.H - GROUND];
   const pickAt = (p) => {
     const [x, y] = toWorld(p);
+    // a finger is less precise than a cursor, so touch grabs reach a little further
     return scene.world.pick(x, y, ((env.coarse ? 14 : 4) * scene.W) / p.w);
   };
   const offPointer = pointer(v.canvas, {
@@ -172,19 +190,19 @@ export function mount(root, env) {
       dirty = true;
       if (body) {
         const [x, y] = toWorld(p);
-        drag = scene.world.addJoint(new MouseJoint(scene.world.fixed, body, x, y));
+        frame.drag = scene.world.addJoint(new MouseJoint(scene.world.fixed, body, x, y));
         v.canvas.style.cursor = 'grabbing';
       } else tap = { x: p.x, y: p.y };
     },
     move(p) {
-      if (drag) {
+      if (frame.drag) {
         const [x, y] = toWorld(p);
-        drag.setTarget(clamp(x, 0, scene.W), clamp(y, 0, scene.top));
+        frame.drag.setTarget(clamp(x, 0, scene.W), clamp(y, 0, scene.top));
         dirty = true;
       } else if (tap && Math.hypot(p.x - tap.x, p.y - tap.y) > 10) tap = null;
     },
     up(p) {
-      if (drag) releaseDrag();
+      if (frame.drag) releaseDrag();
       else if (tap && scene) dropShape(...toWorld(p));
       tap = null;
       dirty = true;
@@ -198,7 +216,7 @@ export function mount(root, env) {
     if (!scene) return;
     const world = scene.world;
     // when every body is asleep and nothing is pending, neither simulate nor redraw
-    if (!paused && (world.moving || scene.busy || drag)) {
+    if (!paused && (world.moving || scene.busy || frame.drag)) {
       acc += dt * (slow ? SLOW_MOTION : 1);
       let steps = 0;
       while (acc >= DT && steps < MAX_STEPS_PER_FRAME) {

@@ -1,7 +1,7 @@
 // gpu.js — the solver on the GPU: render targets and the order of the passes.
 // One step is: advect velocity (two passes), curl, forces, strokes, pressure projection
 // (divergence, red-black relaxation, gradient), then advect dye (two passes) and add dye.
-import { program, fullscreen, target, doubleTarget, texture, toScreen } from '../../assets/js/glkit.js';
+import { program, target, doubleTarget, texture, toScreen } from '../../assets/js/glkit.js';
 import * as S from './shaders.js';
 import { DISPLAY } from './shader-view.js';
 import { STREAKS } from './palette.js';
@@ -65,6 +65,13 @@ export function createSolver(gl, caps) {
   const P = {};
   for (const name of Object.keys(SOURCES)) P[name] = program(gl, SOURCES[name]);
   const streakColors = new Float32Array(STREAKS.flat());
+  // The solver owns its vertex array. The kit caches one per context object, and that one goes
+  // stale when the context is lost and restored.
+  const vao = gl.createVertexArray();
+  const triangle = () => {
+    gl.bindVertexArray(vao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
 
   let n = 0;
   let m = 0;
@@ -97,7 +104,7 @@ export function createSolver(gl, caps) {
   }
   function draw(t) {
     t.bind();
-    fullscreen(gl);
+    triangle();
   }
   function fill(t, r) {
     t.bind();
@@ -163,9 +170,10 @@ export function createSolver(gl, caps) {
     bind(P.divergence);
     draw(div);
     const r = bind(P.relax);
-    r.tex('uDiv', div.tex, 3).f('uOmega', omega);
+    r.tex('uDiv', div.tex, 3);
     for (let s = 0; s < sweeps * 2; s++) {
-      r.tex('uP', prs.read.tex, 2).i('uParity', s & 1);
+      // The last two sweeps are unrelaxed, to smooth the ripple over-relaxation leaves behind.
+      r.tex('uP', prs.read.tex, 2).i('uParity', s & 1).f('uOmega', s >= sweeps * 2 - 4 ? 1 : omega);
       draw(prs.write);
       prs.swap();
     }
@@ -222,7 +230,7 @@ export function createSolver(gl, caps) {
     p.v2('uGrid', n, m).v2('uInv', 1 / n, 1 / m).v2('uDyeInv', 1 / dn, 1 / dm);
     p.i('uView', view).f('uScale', scale);
     p.v3('uBg', bg[0], bg[1], bg[2]).v3('uBody', body[0], body[1], body[2]).v3('uRim', rim[0], rim[1], rim[2]);
-    fullscreen(gl);
+    triangle();
   }
 
   // Float read-back, for the tests only. Returns RGBA floats, or null where the browser refuses.
@@ -262,6 +270,7 @@ export function createSolver(gl, caps) {
     dispose() {
       disposeAll([vel, velHat, prs, div, curl, dye, dyeHat, probe]);
       if (mask) gl.deleteTexture(mask);
+      gl.deleteVertexArray(vao);
       for (const name of Object.keys(P)) P[name].dispose();
     },
   };

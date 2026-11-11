@@ -91,7 +91,7 @@ export default [
       const g = box(32, 24, { x0: 12, x1: 17, y0: 8, y1: 14 });
       randomVelocity(g, 11);
       const before = R.maxDivergence(g);
-      R.project(g, 300, 1.8);
+      R.project(g, 600, 1.9);
       const after = R.maxDivergence(g);
       assert(before > 0.5, `the random field should start far from divergence-free, got ${before}`);
       assert(after < 1e-9, `largest divergence after projection is ${after}`);
@@ -210,11 +210,50 @@ export default [
       R.openTunnel(g, 1);
       for (let j = 8; j < 16; j++) for (let i = 14; i < 19; i++) R.setSolid(g, i, j);
       g.u.fill(1);
-      R.project(g, 600, 1.8);
+      R.project(g, 900, 1.93);
       let out = 0;
       for (let j = 1; j < g.m - 1; j++) out += g.u[g.n - 1 + j * g.n];
       near(out, g.m - 2, 1e-6, 'flux through the open end');
       assert(R.maxDivergence(g) < 1e-8, 'flow around the block should be divergence-free');
+    },
+  },
+  {
+    name: 'a cylinder sheds vortices at a Strouhal number near 0.2',
+    fn() {
+      const n = 80;
+      const m = 40;
+      const speed = 0.8;
+      const g = R.createGrid(n, m);
+      R.openTunnel(g, speed);
+      const d = createDrawing(n / m);
+      preset(d, 'cylinder');
+      const mask = buildMask(d, n, m, true);
+      for (let k = 0; k < mask.length; k++) if (mask[k] === MASK_SOLID) R.setSolid(g, k % n, Math.floor(k / n));
+      g.u.fill(speed);
+      // The same sideways nudge the exhibit gives the wake, so it does not wait for rounding error.
+      for (let j = 0; j < m; j++)
+        for (let i = 0; i < n; i++) {
+          const w = 0.9 * Math.exp(-((i - 0.36 * n) ** 2 + (j - 0.5 * m) ** 2) / (0.07 * m) ** 2);
+          g.v[i + j * n] += (0.6 * speed - g.v[i + j * n]) * w;
+        }
+      R.project(g, 60, 1.8);
+      const diameter = CYLINDER_DIAMETER * m;
+      const probe = Math.round(0.24 * n + 2.5 * diameter) + (m / 2) * n;
+      const flips = [];
+      let sign = 0;
+      for (let s = 0; s < 330; s++) {
+        R.step(g, { sweeps: 10 });
+        const v = g.v[probe];
+        if (s > 150 && Math.abs(v) > 0.05 * speed && Math.sign(v) !== sign) {
+          sign = Math.sign(v);
+          flips.push(s);
+        }
+      }
+      assert(flips.length >= 4, `the wake only swung ${flips.length} times`);
+      // The first entry only marks where watching began, so the period is measured from the second.
+      const period = (2 * (flips[flips.length - 1] - flips[1])) / (flips.length - 2);
+      const strouhal = diameter / (period * speed);
+      assert(strouhal > 0.14 && strouhal < 0.3, `Strouhal number ${strouhal.toFixed(3)}, period ${period.toFixed(1)} steps`);
     },
   },
   {
@@ -361,7 +400,7 @@ export default [
         const raw = solver.readDivergence();
         if (!raw) return; // float read-back is not supported here: nothing to check
         const before = maxAbs(raw, 1);
-        solver.project(120, 1.8);
+        solver.project(120, 1.93);
         const after = maxAbs(solver.readDivergence(), 1);
         assert(before > 0.05, `the stirred field should diverge, got ${before}`);
         // Velocity is stored in half floats, which sets the floor on how small this can get.

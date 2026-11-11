@@ -100,12 +100,22 @@ function bridge(world, v) {
   const rightBank = world.addBox(v.W - bank / 2, deck / 2, bank, deck, { type: STATIC, friction: 0.6 });
   const span = v.W - 2 * bank;
   const n = Math.round(span / (v.tall ? 0.92 : 1));
-  const len = span / n;
   const hinge = { lower: -0.9, upper: 0.9 };
+  // The deck is hung along a shallow parabola, so it is a little longer than the gap it
+  // crosses. A deck of exactly the span could only sag by stretching its hinges.
+  const sag = 0.05 * span;
+  const hx = (i) => bank + (i / n) * span;
+  const hy = (i) => deck - thick / 2 - 4 * sag * (i / n) * (1 - i / n);
   let prev = leftBank;
   for (let i = 0; i < n; i++) {
-    const plank = world.addBox(bank + (i + 0.5) * len, deck - thick / 2, len, thick, { density: 2, friction: 0.6 });
-    world.addJoint(new RevoluteJoint(prev, plank, bank + i * len, deck - thick / 2, hinge));
+    const dx = hx(i + 1) - hx(i);
+    const dy = hy(i + 1) - hy(i);
+    const plank = world.addBox(hx(i) + dx / 2, hy(i) + dy / 2, Math.hypot(dx, dy), thick, {
+      angle: Math.atan2(dy, dx),
+      density: 2,
+      friction: 0.6,
+    });
+    world.addJoint(new RevoluteJoint(prev, plank, hx(i), hy(i), hinge));
     prev = plank;
   }
   world.addJoint(new RevoluteJoint(prev, rightBank, v.W - bank, deck - thick / 2, hinge));

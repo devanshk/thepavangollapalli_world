@@ -40,9 +40,10 @@ export function createGovernor(start, top = LEVELS.length - 1) {
     get level() {
       return level;
     },
-    /** dt: seconds since the previous frame. Returns the level to use now. */
-    sample(dt) {
-      if (dt > 0.25) return level; // a stall such as a tab switch, not a slow frame
+    /** elapsed: seconds since the previous frame. Returns the level to use now. */
+    sample(elapsed) {
+      // One long stall, such as a tab switch, is capped: alone it never adds up to a slow second.
+      const dt = Math.min(elapsed, 0.25);
       clock += dt;
       average += (dt - average) * 0.1;
       if (average > 1 / 42) {

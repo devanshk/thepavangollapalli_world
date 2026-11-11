@@ -16,6 +16,10 @@ const OFF_X = [0.5, 0, 0];
 const OFF_Y = [0, 0.5, 0];
 
 const clamp = (x, lo, hi) => (x < lo ? lo : x > hi ? hi : x);
+const smoothstep01 = (x) => {
+  const t = clamp(x, 0, 1);
+  return t * t * (3 - 2 * t);
+};
 
 export function createGrid(n, m) {
   const f = () => new Float64Array(n * m);
@@ -94,10 +98,14 @@ let lo = 0;
 let hi = 0;
 // Smallest and largest of the four texels a bilinear lookup at (qx, qy) blends.
 function bounds(f, n, m, qx, qy) {
-  let i0 = Math.floor(qx - 0.5);
-  let j0 = Math.floor(qy - 0.5);
-  const i1 = clamp(i0 + 1, 0, n - 1);
-  const j1 = clamp(j0 + 1, 0, m - 1);
+  const fx = qx - 0.5;
+  const fy = qy - 0.5;
+  let i0 = Math.floor(fx);
+  let j0 = Math.floor(fy);
+  // A texel with zero weight was not blended, so it does not count. Without this the limiter
+  // treats a flow and its mirror image differently wherever a trace lands on a texel centre.
+  const i1 = clamp(fx > i0 ? i0 + 1 : i0, 0, n - 1);
+  const j1 = clamp(fy > j0 ? j0 + 1 : j0, 0, m - 1);
   i0 = clamp(i0, 0, n - 1);
   j0 = clamp(j0, 0, m - 1);
   const a = f[i0 + j0 * n];
@@ -119,6 +127,7 @@ function sample(g, f, kind, x, y) {
  * Semi-Lagrangian advection with a MacCormack correction: trace back, trace forward again,
  * and add half of the round-trip error. The result is clamped to the values the back-trace
  * interpolated between, so it can never overshoot. Next to solids it stays first order.
+ * (Both the clamped and the first-order value lie inside those bounds, and so does any blend.)
  */
 function advect(g, src, dst, hat, kind, dt, correct) {
   const { n, m } = g;
@@ -144,10 +153,18 @@ function advect(g, src, dst, hat, kind, dt, correct) {
       const bx = px - dt * ux;
       const by = py - dt * vy;
       let value = hat[k];
-      if (bilinear(g.mask, n, m, px, py) + bilinear(g.mask, n, m, bx, by) <= 0) {
-        value += 0.5 * (src[k] - sample(g, hat, kind, px + dt * ux, py + dt * vy));
+      const wall = bilinear(g.mask, n, m, px, py) + bilinear(g.mask, n, m, bx, by);
+      // Velocity stays first order wherever a solid is in reach; dye fades the correction out
+      // towards solids instead, because a hard switch would show as a seam in the picture.
+      if (kind === 2 ? wall < 0.5 : wall <= 0) {
+        const corrected = value + 0.5 * (src[k] - sample(g, hat, kind, px + dt * ux, py + dt * vy));
         bounds(src, n, m, bx + OFF_X[kind], texelY(g, kind, by));
-        value = clamp(value, lo, hi);
+        const limited = clamp(corrected, lo, hi);
+        // Dye only: where the correction overshoots badly, the edge is sharper than the grid can
+        // carry and clamping it leaves a staircase, so ease back to the first-order value there.
+        const over = kind === 2 ? Math.abs(corrected - limited) / (0.5 * (hi - lo) + 1e-4) : 0;
+        const fixed = limited + (value - limited) * smoothstep01(over);
+        value = fixed + (value - fixed) * smoothstep01(wall / 0.5);
       }
       dst[k] = value;
     }
@@ -194,6 +211,10 @@ export function computeCurl(g) {
     }
 }
 
+// Confinement only acts on vorticity that is clearly there (above about 0.02 per step), so it
+// sharpens real eddies without feeding rounding noise.
+const gate = (w) => smoothstep01((Math.abs(w) - 0.02) / 0.08);
+
 /** Explicit viscosity, vorticity confinement, the tunnel's outflow sponge and a global fade. */
 export function applyForces(g, { confine = 0, viscosity = 0, fade = 1, dt = 1 } = {}) {
   const { n, m, u, v, curl } = g;
@@ -215,10 +236,12 @@ export function applyForces(g, { confine = 0, viscosity = 0, fade = 1, dt = 1 } 
       // Confinement pushes along N × ω, where N points up the gradient of |ω|.
       let gx = 0.25 * (w(i + 1, j) + w(i + 1, j + 1) - w(i - 1, j) - w(i - 1, j + 1));
       let gy = w(i, j + 1) - w(i, j);
-      nextU += confine * dt * (gy / (Math.hypot(gx, gy) + 1e-4)) * 0.5 * (at(curl, i, j) + (j + 1 < m ? curl[k + n] : 0));
+      const wu = 0.5 * (curl[k] + (j + 1 < m ? curl[k + n] : 0));
+      nextU += confine * dt * (gy / (Math.hypot(gx, gy) + 1e-4)) * wu * gate(wu);
       gx = w(i + 1, j) - w(i, j);
       gy = 0.25 * (w(i, j + 1) + w(i + 1, j + 1) - w(i, j - 1) - w(i + 1, j - 1));
-      nextV -= confine * dt * (gx / (Math.hypot(gx, gy) + 1e-4)) * 0.5 * (at(curl, i, j) + (i + 1 < n ? curl[k + 1] : 0));
+      const wv = 0.5 * (curl[k] + (i + 1 < n ? curl[k + 1] : 0));
+      nextV -= confine * dt * (gx / (Math.hypot(gx, gy) + 1e-4)) * wv * gate(wv);
       if (g.inflow > 0) {
         const t = clamp(((i + 0.5) / n - 0.88) / 0.12, 0, 1);
         const s = 0.08 * t * t * (3 - 2 * t);
@@ -249,7 +272,11 @@ export function maxDivergence(g) {
   return worst;
 }
 
-/** Red-black successive over-relaxation of ∇²p = div, starting from the pressure already in g.p. */
+/**
+ * Red-black successive over-relaxation of ∇²p = div, starting from the pressure already in g.p.
+ * The last two sweeps are plain Gauss-Seidel: over-relaxation converges fast but leaves a
+ * cell-to-cell ripple behind, and an unrelaxed sweep is what smooths that away.
+ */
 export function relax(g, sweeps, omega) {
   const { n, m, p, div } = g;
   for (let k = 0; k < p.length; k++) if (g.type[k] !== FLUID) p[k] = 0;
@@ -265,7 +292,7 @@ export function relax(g, sweeps, omega) {
         if (g.type[k - n] !== SOLID) { sum += p[k - n]; count++; }
         if (g.type[k + n] !== SOLID) { sum += p[k + n]; count++; }
         const target = count ? (sum - div[k]) / count : 0;
-        p[k] += omega * (target - p[k]);
+        p[k] += (s >= sweeps * 2 - 4 ? 1 : omega) * (target - p[k]);
       }
 }
 
