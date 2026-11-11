@@ -1,7 +1,7 @@
 # From Scratch
 
 Eight working systems, written from first principles and running live in the browser. No
-libraries, no images, no web fonts, no build step, no network requests.
+libraries, no images, no web fonts, no build step, and nothing fetched from any other site.
 
 | Room | What it is |
 | --- | --- |
