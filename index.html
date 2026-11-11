@@ -63,6 +63,10 @@
             <span class="plan-room"><span class="plan-case"></span></span>
             <span class="plan-n">8</span>
           </a></li>
+          <li><a href="#halt" data-hue="halt" tabindex="-1">
+            <span class="plan-room"><span class="plan-case"></span></span>
+            <span class="plan-n">9</span>
+          </a></li>
         </ol>
       </div>
 
@@ -73,6 +77,7 @@
 
       <div class="lede">
         <p>This page is the answer. Claude Fable 5.2 planned it, wrote every line, tested it in a real browser and shipped it in one session. There are no libraries here, no images and no web fonts, and nothing is fetched from any other site. Each exhibit below is real software running live on your device.</p>
+        <p>The first eight rooms rebuild things people have built before. The ninth holds something I could not find anywhere: a game whose referee rests on a theorem proved in 2024.</p>
         <p class="touch">Touch everything.</p>
       </div>
 
@@ -111,6 +116,10 @@
             <span class="key-name"><span class="key-n">8</span>Learning</span>
             <span class="key-what">A neural network that learns a picture while you watch.</span>
           </a></li>
+          <li><a href="#halt" data-hue="halt">
+            <span class="key-name"><span class="key-n">9</span>Halt</span>
+            <span class="key-what">A new game about whether a machine ever stops, with its small cases solved.</span>
+          </a></li>
         </ol>
       </nav>
     </section>
@@ -127,6 +136,7 @@
           <li><a href="#language" data-hue="language" aria-label="Room 6, Language"><span class="n">6</span><span class="nm">Language</span></a></li>
           <li><a href="#reason" data-hue="reason" aria-label="Room 7, Reason"><span class="n">7</span><span class="nm">Reason</span></a></li>
           <li><a href="#learning" data-hue="learning" aria-label="Room 8, Learning"><span class="n">8</span><span class="nm">Learning</span></a></li>
+          <li><a href="#halt" data-hue="halt" aria-label="Room 9, Halt"><span class="n">9</span><span class="nm">Halt</span></a></li>
           <li class="word"><a href="#proof">Tests</a></li>
           <li class="word"><a href="#method">Method</a></li>
         </ul>
@@ -365,6 +375,35 @@
       </div>
     </section>
 
+    <section class="exhibit" id="halt" data-exhibit="halt" aria-labelledby="halt-name">
+      <p class="room k"><span class="lit" aria-hidden="true"></span>Room 9</p>
+      <h2 class="name" id="halt-name">Halt</h2>
+      <p class="what">A game about whether a machine ever stops</p>
+      <div class="vitrine">
+        <div class="stage" data-stage></div>
+      </div>
+      <p class="sign"><span class="k">Please touch</span> <span>Play the Halter. Only one first move wins. Find it.</span></p>
+      <div class="label">
+        <div class="label-main">
+          <p class="about">Two players write the instructions of a small machine, one box at a time. Then it runs. If it ever stops, the Halter wins; if it runs forever, the Runner wins. Telling those apart is the halting problem, which no program can solve in general. For machines this small it can be settled, because the longest run that ever stops is known: 107 steps for four states, and 47,176,870 for five, proved in 2024.</p>
+          <dl class="tomb">
+            <div><dt class="k">Medium</dt><dd>A Turing machine, a referee that rests on the busy beaver theorem, an exhaustive solver</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="halt-tests">12</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="halt-lines">988</span> lines in <span data-stat="halt-files">6</span> files</dd></div>
+          </dl>
+        </div>
+        <div class="label-notes">
+          <h3 class="k">How it works</h3>
+          <ul class="notes" role="list">
+            <li>The referee runs the machine up to the proven limit for its size. If it is still running then, it never stops.</li>
+            <li>For three and four states every possible game is tried on your device, so the page can say who wins with perfect play and how many first moves do it.</li>
+            <li>For five states there are too many games to try. Nobody knows who wins.</li>
+            <li>I searched for an earlier version of this game and found none. That is not proof that there is none.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section class="proof" id="proof" aria-labelledby="proof-h">
       <h2 id="proof-h">Run the tests yourself</h2>
       <div class="proof-intro">
@@ -387,18 +426,20 @@
         <li><span class="n" aria-hidden="true">5</span><p>Was stopped twice by a usage limit. Each time the work resumed from what had been committed, and the exhibits that had been cut off were finished and their tests repaired.</p></li>
         <li><span class="n" aria-hidden="true">6</span><p>Assembled the page, ran every test in Node and in a real browser at desktop and phone sizes, and looked at screenshots of every room.</p></li>
         <li><span class="n" aria-hidden="true">7</span><p>Sent four fresh agents to read the code and hunt for defects, with iPhone Safari as the first target. They reported 23. All were fixed, and those a test can catch now have one.</p></li>
+        <li><span class="n" aria-hidden="true">8</span><p>Was told that all of this could have been copied from things that already exist. Invented a game about the halting problem, searched for an earlier version, found none, and solved its small cases by trying every possible game.</p></li>
       </ol>
       <dl class="facts">
-        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">8</dd></div>
-        <div><dt class="k">Files</dt><dd data-stat="files">128</dd></div>
-        <div><dt class="k">Lines</dt><dd data-stat="lines">26,670</dd></div>
-        <div><dt class="k">Tests</dt><dd data-stat="tests">195</dd></div>
+        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">9</dd></div>
+        <div><dt class="k">Files</dt><dd data-stat="files">134</dd></div>
+        <div><dt class="k">Lines</dt><dd data-stat="lines">27,705</dd></div>
+        <div><dt class="k">Tests</dt><dd data-stat="tests">207</dd></div>
         <div><dt class="k">Dependencies</dt><dd>0</dd></div>
         <div><dt class="k">Requests to other sites</dt><dd>0</dd></div>
       </dl>
       <aside class="unverified" aria-labelledby="unverified-h">
         <h3 id="unverified-h">What was not verified</h3>
         <p>The build sandbox has no GPU, no Safari and no ears. The WebGL exhibits were checked on a software rasteriser. The music was checked by rendering it offline and measuring it, never by listening. WebKit compatibility comes from careful coding and not from testing. If something misbehaves on your device, that is the likely reason.</p>
+        <p>That the game in room 9 is new rests on a search that found nothing like it. That is evidence, and it is not proof.</p>
       </aside>
     </section>
 

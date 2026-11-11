@@ -12,6 +12,7 @@ const NAMES = {
   language: 'Language',
   reason: 'Reason',
   learning: 'Learning',
+  halt: 'Halt',
 };
 
 const media = (q) => typeof matchMedia === 'function' && matchMedia(q).matches;

@@ -90,6 +90,10 @@
 [data-hue='learning'] {
   --st-accent: #fc96bd;
 }
+[data-exhibit='halt'],
+[data-hue='halt'] {
+  --st-accent: #f1ece0;
+}
 /* --st-accent-soft is derived from --st-accent, so it has to be re-derived wherever the accent changes */
 [data-exhibit],
 [data-hue] {
@@ -267,7 +271,7 @@ blockquote {
   --plan-t: 2px; /* wall thickness */
   --plan-h: 56px;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
 }
 .plan li {
   min-width: 0;
@@ -459,7 +463,7 @@ blockquote {
     display: none;
   }
   .key {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(9, minmax(0, 1fr));
     column-gap: 0;
     margin-top: 0;
   }

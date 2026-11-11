@@ -1,0 +1,184 @@
+/* HALT — the instruction table on the left, the tape beside it, the proofs underneath */
+
+.halt-top {
+  border-top: 0;
+  border-bottom: 1px solid var(--st-line);
+}
+.halt-status {
+  margin: 0;
+  padding: 12px var(--st-pad);
+  min-height: 3.2em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--st-text);
+  border-bottom: 1px solid var(--st-line);
+}
+.halt-main {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  min-width: 0;
+}
+.halt-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px var(--st-pad) 16px;
+  border-right: 1px solid var(--st-line);
+}
+.halt-right {
+  min-width: 0;
+  background: var(--st-bg);
+}
+.halt-tape {
+  max-height: none;
+}
+.halt-caption {
+  margin: 0;
+  padding: 10px var(--st-pad) 12px;
+  font-size: var(--st-fs-sm);
+  color: var(--st-muted);
+  background: var(--st-surface);
+  border-top: 1px solid var(--st-line);
+}
+.halt-board {
+  display: grid;
+  grid-template-columns: 2.2em repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 340px;
+}
+.halt-colhead,
+.halt-rowhead {
+  display: grid;
+  place-items: center;
+  font-size: var(--st-fs-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--st-muted);
+}
+.halt-rowhead {
+  font: 600 16px / 1 var(--font-mono);
+  color: var(--st-text);
+}
+.halt-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 6px;
+  font: 15px / 1 var(--font-mono);
+  color: var(--st-text);
+  background: var(--st-raise);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+}
+.halt-box b {
+  font-weight: 600;
+}
+.halt-box span {
+  color: var(--st-muted);
+}
+.halt-box--given {
+  background: transparent;
+}
+.halt-box--empty {
+  appearance: none;
+  font: var(--st-fs-sm) / 1.2 var(--font-ui);
+  color: var(--st-faint);
+  background: transparent;
+  border-style: dashed;
+  cursor: pointer;
+}
+.halt-box--empty:disabled {
+  cursor: default;
+}
+.halt-box--empty:not(:disabled):hover,
+.halt-box--picked {
+  border-color: var(--st-accent);
+  border-style: solid;
+  background: var(--st-accent-soft);
+}
+.halt-box--hint {
+  border-color: var(--st-good);
+  border-style: solid;
+}
+.halt-box--stop {
+  color: var(--st-bad);
+  border-color: var(--st-bad);
+  border-style: solid;
+}
+.halt-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+  padding: 12px;
+  background: var(--st-raise);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius-sm);
+}
+.halt-picker[hidden] {
+  display: none;
+}
+.halt-rules {
+  margin: 0;
+  font-size: var(--st-fs-sm);
+  line-height: 1.5;
+  color: var(--st-muted);
+}
+.halt-picker-title {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--st-text);
+}
+.halt-proofs {
+  padding: 14px var(--st-pad) 16px;
+  border-top: 1px solid var(--st-line);
+}
+.halt-proofs-title {
+  margin: 0 0 8px;
+  font-size: var(--st-fs-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--st-accent);
+}
+.halt-note {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--st-muted);
+}
+.halt-theorems {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.halt-theorems li {
+  display: grid;
+  gap: 2px;
+  color: var(--st-text);
+}
+.halt-order {
+  font-weight: 600;
+}
+.halt-work {
+  font: var(--st-fs-sm) / 1.4 var(--font-mono);
+  color: var(--st-faint);
+}
+@media (max-width: 720px) {
+  .halt-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .halt-left {
+    border-right: 0;
+    border-bottom: 1px solid var(--st-line);
+  }
+  .halt-board {
+    max-width: none;
+  }
+}

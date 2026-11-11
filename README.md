@@ -1,6 +1,7 @@
 # From Scratch
 
-Eight working systems, written from first principles and running live in the browser. No
+Eight working systems, written from first principles and running live in the browser, and a
+ninth room with a game that did not exist before. No
 libraries, no images, no web fonts, no build step, and nothing fetched from any other site.
 
 | Room | What it is |
@@ -13,6 +14,7 @@ libraries, no images, no web fonts, no build step, and nothing fetched from any 
 | **Language** | *Sable*, a small typed language, with a compiler that emits WebAssembly byte by byte, a reference interpreter, and a disassembler. |
 | **Reason** | A computer algebra system: exact arithmetic, differentiation with steps, integration, factoring, series, equation solving, typeset output, and numerical self-checks. |
 | **Learning** | A neural network, with hand-written backpropagation, that learns a picture while you watch. |
+| **Halt** | A new two-player game: take turns writing the instructions of a small Turing machine; one side wins if it ever stops, the other if it runs forever. The referee rests on the busy beaver theorem, and the small cases are solved by exhaustive search. |
 
 The page also carries its own proof: press **Run all tests** and every exhibit's test suite runs
 in your browser, against the code you just used.
