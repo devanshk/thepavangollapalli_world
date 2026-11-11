@@ -167,7 +167,7 @@ export async function mount(root, env) {
     progress.toggleAttribute('data-done', samples >= sampleBudget);
   }
 
-  const session = createSession({ view: v, renderer, sampleBudget, animate, report });
+  const session = createSession({ view: v, renderer, sampleBudget, animate, report, onError: () => overlay(v.wrap, UNAVAILABLE.float) });
 
   /** Aim through a world point and return the first surface on the way: where to focus. */
   function surfaceToward(point) {
@@ -267,10 +267,18 @@ export async function mount(root, env) {
 
   loadScene(scene);
   renderer.setOptions({ bounces: bounces.value });
+  // Subscribe first: the kit calls a new subscriber at once, and that call must not discard the
+  // image prime() is about to trace. Only a real resize during priming needs a redraw afterwards.
   let primed = false;
+  let resizedMeanwhile = false;
+  const offResize = v.onResize(() => {
+    if (primed) session.resized();
+    else resizedMeanwhile = true;
+  });
+  resizedMeanwhile = false;
   if (v.size.pw) await session.prime();
   primed = true;
-  const offResize = v.onResize(() => primed && session.resized());
+  if (resizedMeanwhile) session.resized();
 
   return {
     start: () => session.start(),

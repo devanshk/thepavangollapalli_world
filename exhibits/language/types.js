@@ -390,6 +390,7 @@ export function check(ast) {
   // signatures first, so functions may call each other in any order
   for (const item of ast.items) {
     if (item.k !== 'fn') continue;
+    if (item.name === 'memory') fail('"memory" is the name of the module\'s own memory, so a function cannot be called that', item.nameSpan);
     declareGlobal(item.name, item.nameSpan, { kind: 'fn', index: program.fns.length, params: item.params.map((p) => p.type), ret: item.ret });
     program.fns.push({ name: item.name, params: item.params.map((p) => p.type), ret: item.ret, localTypes: [], body: [] });
   }

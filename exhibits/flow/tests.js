@@ -318,16 +318,22 @@ export default [
     },
   },
   {
-    name: 'slow frames coarsen the grid and fast frames refine it again',
+    name: 'the grid follows what the GPU can do, not the pace of the display',
     fn() {
       equal(gridFor(2, 16 / 9), { n: 256, m: 144 });
       equal(gridFor(5, 16 / 9), { n: 512, m: 288 });
+      // a solver whose frame time shrinks with the grid: 45 ms at level 3, 25 ms at 2, on time below
       const gov = createGovernor(3);
-      for (let f = 0; f < 80; f++) gov.sample(1 / 24);
-      assert(gov.level < 3, `level stayed at ${gov.level} after three seconds of 24 fps`);
+      const seconds = (level) => Math.max(1 / 60, 0.045 * 0.55 ** (3 - level));
+      for (let f = 0; f < 400; f++) gov.sample(seconds(gov.level));
+      assert(gov.level < 3, `level stayed at ${gov.level} with a solver too slow for it`);
       const low = gov.level;
       for (let f = 0; f < 60 * 400; f++) gov.sample(1 / 60);
       assert(gov.level > low, 'level should rise again once frames are fast');
+      // Low Power Mode: the display runs at 30 Hz however small the grid is
+      const capped = createGovernor(3);
+      for (let f = 0; f < 30 * 20; f++) capped.sample(1 / 30);
+      assert(capped.level >= 3, `a 30 Hz display was mistaken for a slow solver: level ${capped.level}`);
     },
   },
   {

@@ -156,6 +156,10 @@ export function createPlayer(onChange) {
       if (!ctx) return 0;
       return beatAt(ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0));
     },
+    /** Believed to be playing, but the system has suspended or interrupted the audio context. */
+    get stalled() {
+      return active && !!ctx && ctx.state !== 'running';
+    },
     get playing() {
       return playing;
     },

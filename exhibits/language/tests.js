@@ -125,6 +125,7 @@ export default [
       rejects('array a: int[0];', /between 1 and/);
       rejects('const N = 3; fn f() { N = 4; }', /a constant/);
       rejects('let x = 1;', /expected a declaration/, 1, 1);
+      rejects('fn memory() {} fn main() { memory(); }', /module's own memory/, 1, 4);
       rejects('fn f() { let s = "hi"; }', /unexpected character/, 1, 18);
     },
   },

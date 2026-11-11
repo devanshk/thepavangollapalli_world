@@ -168,12 +168,12 @@ const COMMAND = {
     if (!isInt(order) || order.n < 0n || order.n > 16n) throw new MathError('the order of a series should be a whole number from 0 to 16');
     const n = Number(order.n);
     const poly = series(f, x, n);
-    // a truncated series must match the function near 0, with an error that shrinks like x^(n+1)
+    // A truncated series must track the function near 0 with an error that shrinks like x^(n+1):
+    // halving x must cut the error by about 2^(n+1).
     let ok = variables(f).length === 1 ? true : null;
-    for (const h of [0.2, 0.1, 0.05]) {
-      const err = Math.abs(evalReal(f, { [x.name]: h }) - evalReal(poly, { [x.name]: h }));
-      if (ok && !(err <= 200 * h ** (n + 1) + 1e-12)) ok = false;
-    }
+    const errs = [0.2, 0.1, 0.05].map((h) => Math.abs(evalReal(f, { [x.name]: h }) - evalReal(poly, { [x.name]: h })));
+    if (!errs.every(Number.isFinite)) ok = null;
+    else if (ok && !(errs[1] <= errs[0] / 2 ** (n + 0.5) + 1e-12 && errs[2] <= errs[1] / 2 ** (n + 0.5) + 1e-12)) ok = false;
     return {
       question: D.call('series', [disp(f), D.sym(x.name), D.num(n)]),
       // a series reads from the constant term upward
@@ -191,6 +191,7 @@ const COMMAND = {
     const f = sub(lhs, rhs);
     const x = variableFrom(args[1], f);
     const question = D.eq(disp(lhs), disp(rhs));
+    if (has(f, x) && same(simplify(f), ZERO)) return { question, message: `True for every value of ${x.name}.` };
     const s = solve(lhs, rhs, x);
     if (s.all) return { question, message: `True for every value of ${x.name}.` };
     if (s.none || (!s.exact.length && !s.approx.length)) return { question, message: s.none ? 'No solution: the two sides are never equal.' : 'No real solution was found.' , notes: s.notes };

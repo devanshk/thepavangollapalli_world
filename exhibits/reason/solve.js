@@ -1,7 +1,7 @@
 // Equation solving: exact roots for polynomials where a formula or a rational root exists,
 // algebraic isolation when the unknown appears once, and numerical root-finding otherwise.
-import { ZERO, NEG, TWO, HALF, E, int, isZero, isInt, add, mul, pow, fn, neg, sub, div, exp, has, key } from './core.js';
-import { coeffs, ratCoeffs, rationalRoots, pdeg } from './poly.js';
+import { ZERO, NEG, TWO, HALF, E, int, isZero, isInt, toNumber, add, mul, pow, fn, neg, sub, div, exp, has, key } from './core.js';
+import { coeffs, ratCoeffs, rationalRoots, pdeg, pgcd, pderiv, pdivmod } from './poly.js';
 import { evalReal, findRoots } from './numeric.js';
 
 const INVERSE = {
@@ -73,16 +73,26 @@ export function solve(lhs, rhs, x) {
 
   const p = ratCoeffs(f, x);
   if (p) {
+    if (p.length === 1) {
+      // the two sides differ by a constant: always equal, or never
+      out.all = isZero(p[0]);
+      out.none = !out.all;
+      return done();
+    }
     const { roots, rest } = rationalRoots(p);
     out.exact.push(...roots);
-    if (pdeg(rest) === 2) out.exact.push(...quadratic(rest));
-    else if (pdeg(rest) > 2) {
+    // A repeated root does not change the sign, so a scan would miss it. The square-free part
+    // has the same roots, each once.
+    const g = pgcd(rest, pderiv(rest));
+    const simple = pdeg(g) > 0 ? pdivmod(rest, g)[0] : rest;
+    if (pdeg(simple) === 2) out.exact.push(...quadratic(simple));
+    else if (pdeg(simple) > 2) {
       // Cauchy's bound: every root lies within 1 + max|aᵢ/aₙ| of zero
-      const lead = Math.abs(Number(rest[rest.length - 1].n));
-      const bound = 1 + Math.max(...rest.slice(0, -1).map((c) => Math.abs(Number(c.n)) / lead));
-      const poly = (t) => rest.reduceRight((acc, c) => acc * t + Number(c.n), 0);
+      const lead = Math.abs(toNumber(simple[simple.length - 1]));
+      const bound = 1 + Math.max(...simple.slice(0, -1).map((c) => Math.abs(toNumber(c)) / lead));
+      const poly = (t) => simple.reduceRight((acc, c) => acc * t + toNumber(c), 0);
       out.approx.push(...findRoots(poly, -bound, bound, 20000));
-      notes.add(`The remaining factor has degree ${pdeg(rest)} and no rational roots, so its real roots are numerical.`);
+      notes.add(`The remaining factor has degree ${pdeg(simple)} and no rational roots, so its real roots are numerical.`);
     }
     return done();
   }

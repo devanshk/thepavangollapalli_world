@@ -198,7 +198,7 @@ export async function mount(root) {
   }
 
   function togglePlay() {
-    if (player.playing) {
+    if (player.playing && !player.stalled) {
       player.pause();
       return;
     }

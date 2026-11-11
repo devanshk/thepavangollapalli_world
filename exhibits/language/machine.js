@@ -91,6 +91,7 @@ export function createHost({ interpretOnly = false, fuel = 4e8 } = {}) {
         return { id: m.id, ok: true, frameMs, prints: machine.takePrints(), pixels: machine.pixels().buffer };
       }
       if (m.type === 'bench') {
+        if (interpretOnly) throw new Error('the race needs a worker thread, which is not available here');
         const compiled = await createMachine(m.source, { optimise: m.optimise, backend: 'wasm' });
         const name = compiled.has('main') ? 'main' : 'frame';
         const args = name === 'frame' ? [1] : [];

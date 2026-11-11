@@ -50,6 +50,7 @@ export function createSession({ view, renderer, sampleBudget, animate, report, o
   let changedAt = -Infinity;
   let wasMoving = false;
   let stale = true;
+  let ticksWaited = 0; // frames spent waiting for the GPU to finish the batch in flight
 
   function replan() {
     const { pw, ph } = view.size;
@@ -60,6 +61,7 @@ export function createSession({ view, renderer, sampleBudget, animate, report, o
 
   function submitted(work) {
     inFlight = renderer.fence();
+    ticksWaited = 0;
     submittedAt = clock.now();
     submittedWork = work;
   }
@@ -118,11 +120,14 @@ export function createSession({ view, renderer, sampleBudget, animate, report, o
 
     if (inFlight) {
       if (!inFlight.done()) {
+        ticksWaited++;
         schedule();
         return;
       }
+      // A batch that was already finished at the first frame after it only proves it took less than
+      // one display interval, which may be 33 ms on a throttled display: do not call that GPU time.
       const took = now - submittedAt;
-      if (took < STALL_MS) quality.feedback(took, submittedWork);
+      if (took < STALL_MS) quality.feedback(ticksWaited ? took : Math.min(took, 16), submittedWork);
       inFlight = null;
     }
 

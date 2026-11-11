@@ -187,6 +187,9 @@
   overflow: auto;
   background: var(--st-bg);
 }
+.language-pane[hidden] {
+  display: none;
+}
 .language-out {
   display: flex;
   flex-direction: column;

@@ -72,10 +72,10 @@ export function createRunner(h) {
     });
   }
 
-  /** Send, and if the worker died underneath the request, try once more on the page itself. */
+  /** Send, and if the worker was stopped or died underneath the request, send it once more. */
   async function request(message) {
     const reply = await send(message);
-    return reply.lost && useLocal ? send(message) : reply;
+    return reply.lost && reply.error !== 'closed' ? send(message) : reply;
   }
 
   function apply(reply, isLoad) {
@@ -92,6 +92,11 @@ export function createRunner(h) {
     }
     if (reply.pixels) h.onPixels(new Uint8ClampedArray(reply.pixels));
     if (reply.frameMs != null) h.onFrameTime(reply.frameMs);
+    if (useLocal && hasFrame && reply.frameMs > 30) {
+      // no worker thread: animating this on the page itself would freeze it, so keep the still frame
+      hasFrame = false;
+      h.onPrints(['Showing one still frame: without a worker thread this program is too slow to animate here.']);
+    }
   }
 
   return {

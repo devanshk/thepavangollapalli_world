@@ -146,7 +146,11 @@ export function parse(text) {
           return { s: 'call', name, args, pos: t.pos };
         }
         if (COMMANDS.includes(name)) throw new MathError(`"${name}" needs its arguments in brackets, as in ${name}(…)`, t.pos);
-        return { s: 'call', name, args: [power()], pos: t.pos }; // "sin x"
+        // "sin 2x": without brackets the argument runs on through numbers and letters, and stops
+        // at the next function name, bracket or operator
+        let arg = power();
+        while (peek().type === 'num' || (peek().type === 'name' && !FUNCS.includes(peek().text) && !COMMANDS.includes(peek().text))) arg = { s: 'mul', a: arg, b: power() };
+        return { s: 'call', name, args: [arg], pos: t.pos };
       }
       return { s: 'sym', name };
     }

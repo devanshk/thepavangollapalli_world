@@ -409,7 +409,8 @@ export function fn(name, arg) {
     }
   } else if (name === 'abs') {
     if (arg.t === 'num') return arg; // negatives were handled above
-    if (arg === PI || arg === E || (arg.t === 'pow' && (arg.base === E || (isInt(arg.exp) && arg.exp.n % 2n === 0n))) || (arg.t === 'fn' && arg.name === 'abs')) return arg;
+    // e^u and even powers are their own absolute value only for real arguments
+    if (arg === PI || arg === E || (arg.t === 'fn' && arg.name === 'abs') || (arg.t === 'pow' && !has(arg, I) && (arg.base === E || (isInt(arg.exp) && arg.exp.n % 2n === 0n)))) return arg;
   } else if (INVERSE[name] && INVERSE[name][key(arg)]) {
     const [n, d] = INVERSE[name][key(arg)];
     return mul(num(n, d), PI);

@@ -33,7 +33,7 @@ export function mount(root, env) {
   let builtAspect = 0;
   let gravity = 9.8;
   let slow = false;
-  let paused = !!env.reducedMotion;
+  let paused = false; // with reduced motion the page itself withholds start() until asked
   let acc = 0;
   let dirty = true;
   let tap = null;

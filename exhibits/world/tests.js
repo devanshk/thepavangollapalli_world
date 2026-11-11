@@ -362,22 +362,31 @@ export default [
     },
   },
   {
-    name: 'resolution drops when frames are late and recovers when they are not',
+    name: 'resolution follows what the GPU can do, not the pace of the display',
     fn() {
       const q = createQuality({ min: 0.4 });
       let now = 0;
-      const run = (interval, frames) => {
-        let changed = 0;
-        for (let i = 0; i < frames; i++) if (q.sample(interval, (now += interval))) changed++;
-        return changed;
+      // a 60 Hz display and a GPU that needs `cost` ms for a frame at full resolution
+      const run = (cost, frames) => {
+        for (let i = 0; i < frames; i++) {
+          const interval = Math.max(1, Math.ceil((cost * q.scale * q.scale) / 16.7)) * 16.7;
+          q.sample(interval, (now += interval));
+        }
       };
-      equal(run(16.7, 200), 0, 'on-time frames at full resolution change nothing');
-      assert(run(40, 40) > 0 && q.scale < 1, 'late frames lower the resolution');
+      run(8, 200);
+      equal(q.scale, 1, 'a fast GPU stays at full resolution');
+      run(40, 300);
+      assert(q.scale < 0.9, 'a GPU that needs 40 ms a frame is given fewer pixels');
       const low = q.scale;
-      run(16.7, 400);
-      assert(q.scale > low, 'steady on-time frames raise it again');
-      run(120, 400);
+      run(4, 3000);
+      assert(q.scale > low, 'and gets them back when it speeds up');
+      run(150, 600);
       near(q.scale, 0.4, 1e-9, 'it never goes below the floor');
+      // Low Power Mode: the display runs at 30 Hz however little the GPU has to do
+      const capped = createQuality({ min: 0.4 });
+      now = 0;
+      for (let i = 0; i < 600; i++) capped.sample(33.3, (now += 33.3));
+      equal(capped.scale, 1, 'a 30 Hz display is not mistaken for a slow GPU');
     },
   },
   {

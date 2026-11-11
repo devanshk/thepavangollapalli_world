@@ -53,6 +53,10 @@ export const uid = (prefix = 'k') => `${prefix}-${(++uidCounter).toString(36)}`;
  * Props: class, style (object or string), dataset (object), on<Event> functions,
  * anything else is set as a property when the element has one, otherwise as an attribute.
  */
+// Set these as attributes, never as properties: WebKit's `autocorrect` property is a boolean, so
+// assigning the string 'off' would switch it on.
+const AS_ATTRIBUTE = new Set(['for', 'role', 'list', 'autocorrect', 'autocapitalize', 'autocomplete', 'enterkeyhint', 'inputmode']);
+
 export function el(tag, props, ...kids) {
   const node = document.createElement(tag);
   if (props) {
@@ -63,7 +67,7 @@ export function el(tag, props, ...kids) {
       else if (k === 'dataset') Object.assign(node.dataset, v);
       else if (k.length > 2 && k.startsWith('on') && typeof v === 'function')
         node.addEventListener(k.slice(2).toLowerCase(), v);
-      else if (k.includes('-') || k === 'for' || k === 'role' || k === 'list' || !(k in node))
+      else if (k.includes('-') || AS_ATTRIBUTE.has(k) || !(k in node))
         node.setAttribute(k, v === true ? '' : String(v));
       else node[k] = v;
     }

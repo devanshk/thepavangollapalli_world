@@ -30,6 +30,13 @@ export function createQuality({ min = 0.4, max = 1, initial = max } = {}) {
     skip = 2; // the first frames at a new size include the resize itself
   }
 
+  // The display can impose its own pace (30 Hz in Low Power Mode or in a frame not yet touched).
+  // A drop in resolution that did not shorten the frame reveals it: undo the drop and judge
+  // "slow" and "fast" against that pace from then on.
+  let pace = 0;
+  let dropFrom = 0;
+  let dropScale = 0;
+
   return {
     get scale() {
       return scale;
@@ -58,14 +65,24 @@ export function createQuality({ min = 0.4, max = 1, initial = max } = {}) {
       sorted.set(recent);
       sorted.sort();
       median = sorted[WINDOW >> 1];
-      if (median > SLOW_MS && scale > min) {
+      if (dropFrom && median > dropFrom * 0.85) {
+        pace = median;
+        dropFrom = 0;
+        change(dropScale, now);
+        return true;
+      }
+      dropFrom = 0;
+      if (pace && median < pace * 0.75) pace = 0;
+      if (median > Math.max(SLOW_MS, pace * 1.3) && scale > min) {
+        dropFrom = median;
+        dropScale = scale;
         // pixel count goes with the square of the scale
         const factor = Math.min(Math.max(Math.sqrt(TARGET_MS / median), 0.55), 0.9);
         if (now - lastRaise < 4000) raiseAfter = Math.min(raiseAfter * 2, 60000);
         change(Math.max(min, scale * factor), now);
         return true;
       }
-      if (median < FAST_MS && scale < max && now - lastChange > raiseAfter) {
+      if (median < Math.max(FAST_MS, pace * 1.15) && scale < max && now - lastChange > raiseAfter) {
         lastRaise = now;
         change(Math.min(max, scale * 1.15), now);
         return true;

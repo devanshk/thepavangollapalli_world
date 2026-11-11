@@ -156,7 +156,40 @@ export default [
         assert(r.check && r.check.state === 'ok', `${eq}: the solutions do not check`);
       }
       equal(run('3^x = 81').text, 'x = 4');
+      // a repeated root does not change the sign of the polynomial, and must still be found
+      equal(run('x^4 - 4x^2 + 4 = 0').text, 'x = sqrt(2), x = -sqrt(2)');
+      equal(run('solve((x^2 - 3)^2 (x - 1) = 0)').text, 'x = 1, x = sqrt(3), x = -sqrt(3)');
+      // an identity is true everywhere, not unsolvable
+      assert(/every value/.test(run('(x + 1)^2 = x^2 + 2x + 1').message), 'an identity');
+      assert(/every value/.test(run('solve(sin(x)^2 + cos(x)^2 = 1)').message), 'a trigonometric identity');
       equal(run('x^2 + 4x + 13 = 0').text, 'x = -2 + 3i, x = -2 - 3i');
+    },
+  },
+  {
+    name: 'a function written without brackets takes the whole product as its argument',
+    fn() {
+      equal(run('sin 2x').text, 'sin(2x)');
+      equal(run('cos 2x + 1').text, '1 + cos(2x)');
+      equal(run('sin 2pi').text, '0');
+      equal(run('2 sin 3x cos x').text, '2cos(x)*sin(3x)');
+      equal(run('sin x^2').text, 'sin(x^2)');
+    },
+  },
+  {
+    name: 'absolute values of complex numbers are not simplified as if they were real',
+    fn() {
+      near(evalReal(build(parse('abs((1 + i)^4)'))), 4, 1e-9);
+      near(evalReal(build(parse('abs(e^(2i))'))), 1, 1e-9);
+      equal(run('abs(x^2)').text, 'x^2', 'still simplified for real arguments');
+    },
+  },
+  {
+    name: 'a correct series is not called wrong just because its coefficients are large',
+    fn() {
+      for (const input of ['series(1/(1 - 2x), x, 6)', 'series(sin(10x), x, 5)', 'series(sqrt(1 + 4x), x, 4)', 'series(e^x, x, 8)']) {
+        const r = run(input);
+        assert(r.ok && r.check && r.check.state === 'ok', `${input}: ${r.check && r.check.text}`);
+      }
     },
   },
   {

@@ -109,7 +109,7 @@ class Slot {
 const slots = [...document.querySelectorAll('section[data-exhibit]')]
   .filter((s) => s.querySelector('[data-stage]'))
   .map((s) => new Slot(s));
-const slotOf = new Map(slots.map((s) => [s.stage, s]));
+const slotOf = new Map(slots.flatMap((s) => [[s.stage, s], [s.section, s]]));
 
 if ('IntersectionObserver' in window) {
   // Load a little before an exhibit arrives…
@@ -138,6 +138,9 @@ if ('IntersectionObserver' in window) {
     { threshold: 0.12 },
   );
   for (const s of slots) {
+    // In a cross-origin frame the margin above is ignored, so also watch the whole section: its
+    // heading arrives before the stage does, which gives the same head start.
+    nearObserver.observe(s.section);
     nearObserver.observe(s.stage);
     visibleObserver.observe(s.stage);
   }
@@ -160,7 +163,9 @@ if (typeof ResizeObserver === 'function' && !(window.CSS && CSS.supports && CSS.
       const before = heights.get(e.target);
       const now = e.contentRect.height;
       heights.set(e.target, now);
-      if (before != null && now !== before && e.target.getBoundingClientRect().bottom < 0) shift += now - before;
+      const delta = before == null ? 0 : now - before;
+      // judge by where the bottom edge was before it grew, less what this pass has already corrected
+      if (delta && e.target.getBoundingClientRect().bottom - delta - shift < 0) shift += delta;
     }
     if (shift) window.scrollBy(0, shift);
   });
