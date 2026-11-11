@@ -194,27 +194,27 @@
     <section class="exhibit" id="flow" data-exhibit="flow" aria-labelledby="flow-name">
       <p class="room k"><span class="lit" aria-hidden="true"></span>Room 3</p>
       <h2 class="name" id="flow-name">Flow</h2>
-      <p class="what">A fluid solved on a grid</p>
+      <p class="what">A fluid solver on the GPU</p>
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Stir slowly, then quickly. Two fingers make two currents.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Drag through the ink. Then switch to the wind tunnel and draw a wall.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">The fluid lives on a grid of cells, and each cell holds a velocity and a little dye. Every frame the solver carries both along the flow, then removes whatever would compress the fluid. Drag a finger through it and watch the vortices roll away.</p>
+          <p class="about">The velocity and pressure of every cell of a grid are recomputed in fragment shaders each frame, and coloured ink is carried along by the result. Each finger leaves its own colour, which curls up into eddies. In the wind tunnel the wake behind a cylinder starts to swing and sheds a row of alternating vortices.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>WebGL 2, stable fluids, twenty pressure iterations</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="flow-tests">19</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="flow-lines">2,149</span> lines in <span data-stat="flow-files">11</span> files</dd></div>
+            <div><dt class="k">Medium</dt><dd>WebGL 2, half-float textures, a staggered grid</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="flow-tests">20</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="flow-lines">2,315</span> lines in <span data-stat="flow-files">11</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>Semi-Lagrangian advection keeps the simulation stable at any time step.</li>
-            <li>A pressure projection makes the velocity field free of divergence.</li>
-            <li>Vorticity confinement puts back the small swirls that the grid smooths away.</li>
-            <li>Every step runs in a fragment shader on half-float textures.</li>
+            <li>The grid is staggered: pressure sits at cell centres and velocity on cell faces, so a wall is simply a face whose velocity is fixed.</li>
+            <li>Ink and velocity are carried by tracing the flow backwards, then forwards, and correcting half the round-trip error, clamped so no new peaks appear.</li>
+            <li>Pressure is solved by red-black over-relaxation, starting each frame from the last frame’s answer.</li>
+            <li>A plain JavaScript solver runs the same passes for the tests, which check that a cylinder sheds vortices at a realistic rate.</li>
           </ul>
         </div>
       </div>
@@ -227,23 +227,23 @@
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Knock the tower over, then rebuild it taller.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Grab a shape and throw it. Then switch on Show internals.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Boxes, balls and joints obey Newton’s laws here, sixty times a second. Stacks stand still instead of trembling, and chains swing without stretching. Pick anything up and throw it.</p>
+          <p class="about">Boxes, balls and polygons that collide, stack, slide with friction, swing on chains and fall asleep when they come to rest. Five scenes play by themselves, from a wrecking ball to a hopper pouring hundreds of shapes. Show internals draws what the engine sees: bounding boxes, every contact point and its normal.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>JavaScript, sequential impulses, a fixed 60 Hz step</dd></div>
+            <div><dt class="k">Medium</dt><dd>Plain JavaScript on a 2D canvas, 120 fixed steps a second</dd></div>
             <div><dt class="k">Tests</dt><dd data-stat="motion-tests">20</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="motion-lines">2,701</span> lines in <span data-stat="motion-files">9</span> files</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="motion-lines">2,737</span> lines in <span data-stat="motion-files">9</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>A spatial hash finds candidate pairs; the separating axis theorem tests them.</li>
-            <li>Contacts are solved by sequential impulses, warm-started from the frame before.</li>
-            <li>Stacks stay still because contact points persist from one frame to the next.</li>
-            <li>Joints are constraints, solved in the same pass as the contacts.</li>
+            <li>Collision detection is sort-and-sweep, then a separating-axis test with edge clipping that yields up to two contact points per pair.</li>
+            <li>Contacts are solved by sequential impulses with warm starting and Coulomb friction; a 2×2 block solve keeps tall stacks from leaning.</li>
+            <li>Overlap is removed with split impulses, so pushing bodies apart never adds energy.</li>
+            <li>Nothing depends on the clock or on chance: the same scene gives bit-identical results on every run, and a test checks it.</li>
           </ul>
         </div>
       </div>
@@ -252,27 +252,27 @@
     <section class="exhibit" id="sound" data-exhibit="sound" aria-labelledby="sound-name">
       <p class="room k"><span class="lit" aria-hidden="true"></span>Room 5</p>
       <h2 class="name" id="sound-name">Sound</h2>
-      <p class="what">A composer and its synthesiser</p>
+      <p class="what">A composer and a synthesiser</p>
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Tap play, then move the mood from calm to restless.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Press Play. Then change the mood, or type a word to seed a new piece.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">Nothing here is recorded. A small set of rules about harmony and rhythm writes the music one bar ahead, and a synthesiser built from oscillators and filters plays it. It does not repeat. Tap to start, then change the mood and hear it turn.</p>
+          <p class="about">Nothing here is recorded. The notes are composed as you listen, by rules of harmony and voice-leading, and every instrument is built from oscillators and filters in your browser. A word decides the piece, and the same word always plays the same music.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>Web Audio, no samples, a look-ahead scheduler</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="sound-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="sound-lines">0</span> lines in <span data-stat="sound-files">0</span> files</dd></div>
+            <div><dt class="k">Medium</dt><dd>Web Audio API: oscillators, filters and a generated reverb; no samples</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="sound-tests">20</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="sound-lines">2,113</span> lines in <span data-stat="sound-files">9</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>Chord progressions walk a graph of functional harmony.</li>
-            <li>Melodies follow voice-leading rules, with a seeded source of chance.</li>
-            <li>Every voice is synthesised from oscillators, envelopes, filters and a delay line.</li>
-            <li>Notes are scheduled ahead on the audio clock, so the rhythm never drifts.</li>
+            <li>Chord progressions come from a small grammar of functional harmony, and chords are voiced to move as little as possible.</li>
+            <li>The melody grows from a short motif that is repeated, varied and answered, landing on chord tones on strong beats.</li>
+            <li>Pad, bass, pluck, lead and drums are synthesised; the reverb’s impulse response is generated, not recorded.</li>
+            <li>A look-ahead scheduler places each note on the audio clock, so timing does not depend on the page’s frame rate.</li>
           </ul>
         </div>
       </div>
@@ -339,27 +339,27 @@
     <section class="exhibit" id="learning" data-exhibit="learning" aria-labelledby="learning-name">
       <p class="room k"><span class="lit" aria-hidden="true"></span>Room 8</p>
       <h2 class="name" id="learning-name">Learning</h2>
-      <p class="what">A neural network, trained as you watch</p>
+      <p class="what">A neural network that learns a picture</p>
       <div class="vitrine">
         <div class="stage" data-stage></div>
       </div>
-      <p class="sign"><span class="k">Please touch</span> <span>Draw something, then watch it being learned.</span></p>
+      <p class="sign"><span class="k">Please touch</span> <span>Switch Fourier features off and watch it blur. Then draw your own picture.</span></p>
       <div class="label">
         <div class="label-main">
-          <p class="about">A small network starts out knowing nothing and is shown a picture, one pixel at a time. With every step it adjusts its weights to be a little less wrong, and the image slowly comes into focus. Draw your own picture and it will learn that instead.</p>
+          <p class="about">A small neural network is learning to be this picture: give it a position and it answers with a colour. It starts from noise and takes many small steps a second towards the target. Because the result is a function and not a grid, the lens can look between the pixels.</p>
           <dl class="tomb">
-            <div><dt class="k">Medium</dt><dd>JavaScript, hand-written backpropagation, Adam</dd></div>
-            <div><dt class="k">Tests</dt><dd data-stat="learning-tests">0</dd></div>
-            <div><dt class="k">Source</dt><dd><span data-stat="learning-lines">0</span> lines in <span data-stat="learning-files">0</span> files</dd></div>
+            <div><dt class="k">Medium</dt><dd>Typed arrays, hand-written backpropagation and Adam, a worker thread</dd></div>
+            <div><dt class="k">Tests</dt><dd data-stat="learning-tests">13</dd></div>
+            <div><dt class="k">Source</dt><dd><span data-stat="learning-lines">2,177</span> lines in <span data-stat="learning-files">11</span> files</dd></div>
           </dl>
         </div>
         <div class="label-notes">
           <h3 class="k">How it works</h3>
           <ul class="notes" role="list">
-            <li>A multilayer perceptron maps a position on the canvas to a colour.</li>
-            <li>Fourier features let a small network hold fine detail.</li>
-            <li>Gradients come from reverse-mode differentiation, written by hand.</li>
-            <li>The Adam optimiser takes a few hundred steps a second in a worker.</li>
+            <li>The network is a multilayer perceptron; its gradients come from backpropagation written by hand and checked against numerical differences.</li>
+            <li>Random Fourier features turn a position into sines and cosines, which lets a small network hold fine detail.</li>
+            <li>The Adam optimiser trains on random batches of pixels in a worker thread, so the page stays smooth.</li>
+            <li>The tiles show what single hidden units respond to across the picture.</li>
           </ul>
         </div>
       </div>
@@ -380,23 +380,24 @@
     <section class="method" id="method" aria-labelledby="method-h">
       <h2 id="method-h">How this was made</h2>
       <ol class="steps" role="list">
-        <li><span class="n" aria-hidden="true">1</span><p>Read the brief, cleared the repository, and decided what would be worth building.</p></li>
-        <li><span class="n" aria-hidden="true">2</span><p>Wrote a foundation: design tokens, a small interface kit, a WebGL layer, a test runner that works in Node and in the browser, and headless-browser tooling.</p></li>
-        <li><span class="n" aria-hidden="true">3</span><p>Built the eight exhibits in parallel, one agent each, all the same model, each responsible for its own tests and screenshots.</p></li>
-        <li><span class="n" aria-hidden="true">4</span><p>Sent fresh agents to attack every exhibit: hunt for bugs, break the layout on a phone, question the mathematics. Fixed what they found.</p></li>
-        <li><span class="n" aria-hidden="true">5</span><p>Assembled the page, ran every test again, and checked the result in a real browser at desktop and phone sizes.</p></li>
+        <li><span class="n" aria-hidden="true">1</span><p>Read the brief, cleared the repository, and chose eight things that are hard to get right and easy to check.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><p>Wrote a foundation: design tokens, a small interface kit, a WebGL layer, a test runner that works in Node and in the browser, and tooling to drive a headless browser.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><p>Set three agents to design this page in three different directions. Two finished, and this one was chosen from their screenshots.</p></li>
+        <li><span class="n" aria-hidden="true">4</span><p>Built the exhibits. Six were written by agents of the same model, each working alone from a written brief and responsible for its own tests. Language and Reason were written directly in the main session.</p></li>
+        <li><span class="n" aria-hidden="true">5</span><p>Was stopped twice by a usage limit. Each time the work resumed from what had been committed, and the exhibits that had been cut off were finished and their tests repaired.</p></li>
+        <li><span class="n" aria-hidden="true">6</span><p>Assembled the page, ran every test in Node and in a real browser at desktop and phone sizes, and looked at screenshots of every room.</p></li>
       </ol>
       <dl class="facts">
-        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">6</dd></div>
-        <div><dt class="k">Files</dt><dd data-stat="files">108</dd></div>
-        <div><dt class="k">Lines</dt><dd data-stat="lines">22,023</dd></div>
-        <div><dt class="k">Tests</dt><dd data-stat="tests">158</dd></div>
+        <div><dt class="k">Exhibits</dt><dd data-stat="exhibits">8</dd></div>
+        <div><dt class="k">Files</dt><dd data-stat="files">128</dd></div>
+        <div><dt class="k">Lines</dt><dd data-stat="lines">26,521</dd></div>
+        <div><dt class="k">Tests</dt><dd data-stat="tests">192</dd></div>
         <div><dt class="k">Dependencies</dt><dd>0</dd></div>
         <div><dt class="k">Network requests</dt><dd>0</dd></div>
       </dl>
       <aside class="unverified" aria-labelledby="unverified-h">
         <h3 id="unverified-h">What was not verified</h3>
-        <p>The build sandbox has no GPU and no Safari. The WebGL exhibits were checked on a software rasteriser, and WebKit compatibility comes from careful coding rather than from testing. If something misbehaves on your device, that is the likely reason.</p>
+        <p>The build sandbox has no GPU, no Safari and no ears. The WebGL exhibits were checked on a software rasteriser. The music was checked by rendering it offline and measuring it, never by listening. WebKit compatibility comes from careful coding and not from testing. If something misbehaves on your device, that is the likely reason.</p>
       </aside>
     </section>
 

@@ -154,7 +154,8 @@ const vaos = new WeakMap();
 /** Draw the full-screen triangle with the currently bound program. */
 export function fullscreen(gl) {
   let vao = vaos.get(gl);
-  if (!vao) {
+  // after a lost and restored context the old vertex array no longer belongs to it
+  if (!vao || !gl.isVertexArray(vao)) {
     vao = gl.createVertexArray();
     vaos.set(gl, vao);
   }
